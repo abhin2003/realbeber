@@ -1,0 +1,351 @@
+/* ==========================================================================
+   Realbeber & Co. - Responsive Breakpoints (Mobile, Tablet & Desktop)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Large Desktop & Laptop (< 1200px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1200px) {
+  .hero-section {
+    min-height: 480px;
+  }
+  .hero-content-col {
+    padding: 44px 36px;
+  }
+  .product-collection-section {
+    padding: 36px 28px;
+  }
+  .benefits-section {
+    padding: 48px 30px;
+  }
+  .promo-banner-section {
+    min-height: 340px;
+  }
+  .promo-content-col {
+    padding: 36px 32px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Tablet & Small Laptops (< 992px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+  .nav-menu {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hero */
+  .hero-section {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .hero-visual-col {
+    min-height: 360px;
+  }
+
+  /* Products 2x2 Grid */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  /* Bento Grid Reflow */
+  .bento-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .bento-card-1 {
+    grid-column: span 3;
+  }
+
+  .bento-card-2 {
+    grid-column: span 3;
+  }
+
+  .bento-card-3 {
+    grid-column: span 6;
+    grid-row: auto;
+    min-height: 380px;
+  }
+
+  .bento-card-4 {
+    grid-column: span 3;
+    grid-row: auto;
+  }
+
+  .bento-card-5 {
+    grid-column: span 3;
+  }
+
+  .bento-card-6 {
+    grid-column: span 4;
+  }
+
+  .bento-card-7 {
+    grid-column: span 2;
+  }
+
+  /* Philosophy */
+  .philosophy-section {
+    grid-template-columns: 1fr;
+    padding: 44px 32px;
+    gap: 32px;
+  }
+
+  .philosophy-left {
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Promo Banner */
+  .promo-banner-section {
+    grid-template-columns: 1fr;
+  }
+
+  .promo-image-col {
+    min-height: 280px;
+  }
+
+  /* Footer */
+  .footer-top-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+
+  /* Quick View Modal */
+  .quick-view-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-view-visual {
+    padding: 30px;
+  }
+
+  .quick-view-pouch-img {
+    max-height: 220px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Devices (< 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+  .page-wrapper {
+    padding: 8px 10px 24px;
+    gap: 12px;
+  }
+
+  .announcement-bar {
+    font-size: 0.65rem;
+    padding: 6px 12px;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .site-header {
+    padding: 8px 16px;
+    top: 8px;
+  }
+
+  .brand-logo-mark {
+    font-size: 1.25rem;
+  }
+
+  .brand-logo-sub {
+    font-size: 0.75rem;
+  }
+
+  /* Mobile Hero */
+  .hero-content-col {
+    padding: 36px 20px 30px;
+    gap: 16px;
+  }
+
+  .hero-title {
+    font-size: 2.3rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .hero-visual-col {
+    min-height: 280px;
+  }
+
+  /* Mobile Product Collection */
+  .product-collection-section {
+    padding: 28px 16px 32px;
+  }
+
+  .section-header-row {
+    margin-bottom: 20px;
+  }
+
+  .section-main-heading {
+    font-size: 1.6rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .product-card {
+    padding: 12px 10px 14px;
+    border-radius: var(--radius-sm-card);
+  }
+
+  .product-pouch-img {
+    max-height: 160px;
+  }
+
+  .product-card-title {
+    font-size: 0.9rem;
+  }
+
+  .product-card-desc {
+    font-size: 0.7rem;
+    min-height: auto;
+  }
+
+  .product-card-price {
+    font-size: 0.92rem;
+  }
+
+  .add-to-cart-btn {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+  }
+
+  /* Mobile Benefits & Science */
+  .benefits-section {
+    padding: 40px 16px 44px;
+  }
+
+  .benefits-heading {
+    font-size: 1.9rem;
+  }
+
+  .benefits-subtext {
+    font-size: 0.85rem;
+  }
+
+  /* Mobile Bento Grid: Intentional Stack */
+  .bento-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bento-card {
+    padding: 20px 18px;
+    min-height: auto;
+  }
+
+  .bento-tall-pouch {
+    max-height: 200px;
+  }
+
+  .bento-tall-title {
+    font-size: 1.3rem;
+  }
+
+  /* Mobile Philosophy */
+  .philosophy-section {
+    padding: 36px 18px;
+  }
+
+  .philosophy-heading {
+    font-size: 1.9rem;
+  }
+
+  .philosophy-right-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .philosophy-circle-wrap {
+    width: 120px;
+    height: 120px;
+  }
+
+  /* Mobile Promo Banner */
+  .promo-content-col {
+    padding: 28px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .promo-heading {
+    font-size: 1.7rem;
+  }
+
+  .promo-inset-circle {
+    display: none;
+  }
+
+  /* FAQ */
+  .faq-section {
+    padding: 36px 18px;
+  }
+
+  .faq-question-btn {
+    padding: 14px 18px;
+    font-size: 0.9rem;
+  }
+
+  /* Footer */
+  .site-footer {
+    padding: 40px 20px 24px;
+  }
+
+  .footer-top-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footer-bottom-bar {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+
+  /* Cart Drawer Mobile */
+  .cart-drawer {
+    max-width: 100%;
+  }
+
+  /* Toast Notification */
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    bottom: 16px;
+  }
+
+  .toast-item {
+    min-width: auto;
+    max-width: 100%;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Small Mobile Devices (< 380px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 380px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-pouch-img {
+    max-height: 180px;
+  }
+}
+

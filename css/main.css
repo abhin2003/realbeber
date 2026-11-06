@@ -1,0 +1,187 @@
+/* ==========================================================================
+   Realbeber & Co. - Design Tokens & Core Styles
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600;1,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+:root {
+  /* Brand Color Palette - Fresh Organic Tone */
+  --color-outer-bg: #F5F1E8; /* Warm Natural Organic Cream */
+  --color-card-border: rgba(0, 0, 0, 0.06);
+  
+  /* Primary Section Backgrounds */
+  --color-hero-yellow: #F9C74F;
+  --color-hero-yellow-hover: #F2BD3F;
+  --color-benefits-cream: #FFFFFF;
+  --color-promo-mint: #D6ECE3;
+  --color-dark-section: #122B1F; /* Rich deep Kerala Forest Evergreen */
+  --color-footer-bg: #0E2218;    /* Deep Rainforest Canopy */
+
+  /* Product Specific Tints */
+  --color-mango-bg: #FFF1C5;
+  --color-chikku-bg: #D8ECE4;
+  --color-jackfruit-bg: #FED0C7;
+  --color-banana-bg: #D0E5F7;
+
+  /* Bento Card Tints */
+  --bento-brown: #3E3028;
+  --bento-amber: #DD7D26;
+  --bento-coral-tall: #EA5747;
+  --bento-green: #204A35;
+  --bento-dark: #1E1E1E;
+  --bento-coral-sm: #DE5B4F;
+  --bento-sand: #EAE1D2;
+
+  /* Typography Colors */
+  --text-dark: #111111;
+  --text-dark-muted: #555555;
+  --text-light: #FFFFFF;
+  --text-light-muted: #A3A3A3;
+  --text-light-subtle: #737373;
+
+  /* Premium Typography Scale */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+
+  /* Radii */
+  --radius-outer-section: 28px;
+  --radius-inner-card: 22px;
+  --radius-sm-card: 16px;
+  --radius-pill: 9999px;
+
+  /* Elevation */
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
+  --shadow-medium: 0 12px 36px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 18px 42px rgba(0, 0, 0, 0.12);
+  --shadow-pouch: 0 20px 40px -10px rgba(0, 0, 0, 0.25);
+
+  /* Transitions */
+  --transition-fast: 0.18s ease;
+  --transition-normal: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-bounce: 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Base Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-outer-bg);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-dark);
+  background-color: var(--color-outer-bg);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+img, svg, picture {
+  display: block;
+  max-width: 100%;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* Outer Website Container (Distinctive Black Outer Frame) */
+.page-wrapper {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 12px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Reusable Section Card Container */
+.section-card {
+  border-radius: var(--radius-outer-section);
+  overflow: hidden;
+  position: relative;
+  transition: transform var(--transition-normal);
+}
+
+/* Common Pill Badge */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Common Pill Action Button */
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all var(--transition-normal);
+  white-space: nowrap;
+}
+
+.pill-btn-black {
+  background-color: #111111;
+  color: #FFFFFF;
+}
+
+.pill-btn-black:hover {
+  background-color: #262626;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.pill-btn-white {
+  background-color: #FFFFFF;
+  color: #111111;
+}
+
+.pill-btn-white:hover {
+  background-color: #F0F0F0;
+  transform: translateY(-2px);
+}
+
+.pill-btn svg {
+  transition: transform var(--transition-normal);
+}
+
+.pill-btn:hover svg {
+  transform: translateX(3px);
+}
+
