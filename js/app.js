@@ -6,6 +6,10 @@
 
 import { PRODUCTS } from './products.js';
 import { CartController } from './cart.js';
+import { initFruitTransformation } from './fruit-transformation-3d.js';
+import { initFruitExplorer } from './fruit-explorer-3d.js';
+import { initCrunchPlayground } from './crunch-playground.js';
+import { initMomentsGallery } from './moments-gallery.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize Cart
@@ -22,6 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initFAQ();
   initNewsletter();
   initScrollEffects();
+
+  // Initialize Immersive 3D Interactive Experiences
+  initFruitTransformation();
+  initFruitExplorer();
+  initCrunchPlayground();
+  initMomentsGallery();
 });
 
 /**
