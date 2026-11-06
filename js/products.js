@@ -2,6 +2,13 @@
  * Realbeber & Co. - Confirmed Product Catalog
  * Strictly four confirmed varieties: Mango, Chikku (Sapodilla), Jackfruit, Banana
  */
+
+// Import pouch assets so Vite bundles and resolves them in production
+import mangoPouch from '../assets/products/mango_clean_pouch.png';
+import chikkuPouch from '../assets/products/chikku_clean_pouch.png';
+import jackfruitPouch from '../assets/products/jackfruit_clean_pouch.png';
+import bananaPouch from '../assets/products/banana_clean_pouch.png';
+
 export const PRODUCTS = [
   {
     id: 'mango-frost-chips',
@@ -15,7 +22,7 @@ export const PRODUCTS = [
     accentColor: '#D97706',
     price: 149,
     weight: '35g (from 350g fresh fruit)',
-    pouchImage: 'assets/products/mango_clean_pouch.png',
+    pouchImage: mangoPouch,
     mockupImage: 'assets/products/mango_mockup.jpg',
     flatPack: 'assets/uploads/mango_pack.jpg',
     description: '100% pure Kerala Alphonso & local mangoes, harvested at peak sun sweetness and freeze-dried at sub-zero temperatures. Retains vibrant golden color, tropical sweetness, and an ethereal melt-in-mouth crunch with zero oil or sugar.',
@@ -43,7 +50,7 @@ export const PRODUCTS = [
     accentColor: '#059669',
     price: 139,
     weight: '40g (from 400g fresh fruit)',
-    pouchImage: 'assets/products/chikku_clean_pouch.png',
+    pouchImage: chikkuPouch,
     mockupImage: 'assets/products/chikku_mockup.jpg',
     flatPack: 'assets/uploads/chikku_pack.jpg',
     description: 'Velvety sapodilla (chikku) freeze-dried into airy honeycomb slices. Delivers warm notes of brown sugar, caramel malt, and roasted honey with a delicate crumbly crunch that dissolves into pure fruit puree on your palate.',
@@ -71,7 +78,7 @@ export const PRODUCTS = [
     accentColor: '#DC2626',
     price: 149,
     weight: '35g (from 350g fresh fruit)',
-    pouchImage: 'assets/products/jackfruit_clean_pouch.png',
+    pouchImage: jackfruitPouch,
     mockupImage: 'assets/products/jackfruit_mockup.jpg',
     flatPack: 'assets/uploads/jackfruit_pack.jpg',
     description: 'The pride of Kerala—firm golden Varikka jackfruit pods freeze-dried into crisp, fragrant shards. Rich in potassium and fiber with an exotic aroma of pineapple and floral honey. Completely oil-free and non-sticky.',
@@ -99,7 +106,7 @@ export const PRODUCTS = [
     accentColor: '#2563EB',
     price: 129,
     weight: '40g (from 400g fresh fruit)',
-    pouchImage: 'assets/products/banana_clean_pouch.png',
+    pouchImage: bananaPouch,
     mockupImage: 'assets/products/banana_mockup.jpg',
     flatPack: 'assets/uploads/banana_pack.jpg',
     description: 'Golden Kerala Nendran & Robusta bananas sliced and sublimated into ultralight, cloud-crisp medallions. A wholesome revelation compared to traditional fried banana chips—zero palm oil, zero salt, 100% wholesome crunch.',
