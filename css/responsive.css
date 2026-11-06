@@ -177,7 +177,12 @@
   }
 
   .hero-visual-col {
-    min-height: 280px;
+    min-height: 320px;
+  }
+
+  .hero-carousel-dots {
+    bottom: 14px;
+    padding: 4px 10px;
   }
 
   /* Mobile Product Collection */

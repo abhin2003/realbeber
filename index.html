@@ -78,7 +78,9 @@
     <!-- 3. Hero Section (Split Yellow & Photographic Hero) -->
     <section class="section-card hero-section" id="about" aria-label="Introduction">
       <div class="hero-content-col">
-        <span class="pill-badge hero-pill-tag">REAL SNACKS. REAL ENERGY.</span>
+        <span class="pill-badge hero-pill-tag" id="heroFlavorBadge">
+          REAL SNACKS. REAL ENERGY. &bull; <strong id="currentHeroFlavor">MANGO</strong>
+        </span>
         <h1 class="hero-title">
           SNACK<br>
           SMARTER<br>
@@ -95,13 +97,49 @@
         </a>
       </div>
 
-      <div class="hero-visual-col">
-        <img 
-          src="assets/images/hero_fruits_composition.jpg" 
-          alt="Realbeber & Co. freeze-dried fruit chips with floating mango, banana, jackfruit and chikku slices on warm studio backdrop" 
-          class="hero-photography-img"
-          loading="eager"
-        >
+      <div class="hero-visual-col" id="heroVisualCol">
+        <div class="hero-slides-wrapper" id="heroSlidesWrapper">
+          <div class="hero-slide active" data-flavor="MANGO" data-index="0">
+            <img 
+              src="assets/hero/hero_mango.jpg" 
+              alt="Realbeber Freeze-Dried Mango Frost Chips with floating mango crisps" 
+              class="hero-photography-img"
+              loading="eager"
+            >
+          </div>
+          <div class="hero-slide" data-flavor="JACKFRUIT" data-index="1">
+            <img 
+              src="assets/hero/hero_jackfruit.jpg" 
+              alt="Realbeber Freeze-Dried Jackfruit Frost Chips with floating jackfruit crisps" 
+              class="hero-photography-img"
+              loading="lazy"
+            >
+          </div>
+          <div class="hero-slide" data-flavor="BANANA" data-index="2">
+            <img 
+              src="assets/hero/hero_banana.jpg" 
+              alt="Realbeber Freeze-Dried Banana Frost Chips with floating banana crisps" 
+              class="hero-photography-img"
+              loading="lazy"
+            >
+          </div>
+          <div class="hero-slide" data-flavor="CHIKKU" data-index="3">
+            <img 
+              src="assets/hero/hero_chikku.jpg" 
+              alt="Realbeber Freeze-Dried Chikku Frost Chips with floating chikku crisps" 
+              class="hero-photography-img"
+              loading="lazy"
+            >
+          </div>
+        </div>
+
+        <!-- Simple Centered Dots -->
+        <div class="hero-carousel-dots" id="heroDots" role="tablist" aria-label="Hero fruit slides">
+          <button class="hero-dot active" data-slide="0" aria-label="Slide 1: Mango"></button>
+          <button class="hero-dot" data-slide="1" aria-label="Slide 2: Jackfruit"></button>
+          <button class="hero-dot" data-slide="2" aria-label="Slide 3: Banana"></button>
+          <button class="hero-dot" data-slide="3" aria-label="Slide 4: Chikku"></button>
+        </div>
       </div>
     </section>
 
@@ -206,7 +244,7 @@
 
           <div class="bento-pouch-container">
             <img 
-              src="assets/products/jackfruit_card.jpg" 
+              src="assets/products/jackfruit_clean_pouch.png" 
               alt="Jackfruit Frost Chips pouch showcase" 
               class="bento-tall-pouch"
               loading="lazy"
@@ -282,7 +320,7 @@
           INGREDIENTS.<br>
           GREAT TASTE.
         </h2>
-        <a href="#science" class="pill-btn pill-btn-white philosophy-cta-btn">
+        <a href="#science" class="pill-btn pill-btn-black philosophy-cta-btn">
           <span>Learn more</span>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>

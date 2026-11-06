@@ -5,23 +5,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600;1,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 :root {
-  /* Brand Color Palette - Fresh Organic Tone */
-  --color-outer-bg: #F5F1E8; /* Warm Natural Organic Cream */
+  /* Brand Color Palette - Exact Reference Design */
+  --color-outer-bg: #F9F8F4;        /* Warm Natural Linen / Off-White */
   --color-card-border: rgba(0, 0, 0, 0.06);
   
   /* Primary Section Backgrounds */
-  --color-hero-yellow: #F9C74F;
+  --color-hero-yellow: #F9C74F;      /* Warm Sunny Golden Yellow */
   --color-hero-yellow-hover: #F2BD3F;
-  --color-benefits-cream: #FFFFFF;
-  --color-promo-mint: #D6ECE3;
-  --color-dark-section: #122B1F; /* Rich deep Kerala Forest Evergreen */
-  --color-footer-bg: #0E2218;    /* Deep Rainforest Canopy */
+  --color-benefits-cream: #FAF7F2;   /* Editorial Warm Cream */
+  --color-promo-mint: #D6ECE3;       /* Soft Sage Mint */
+  --color-philosophy-bg: #FAF7F2;    /* Editorial Clean Cream for Philosophy */
+  --color-faq-bg: #FFFFFF;           /* Crisp White for FAQ */
+  --color-footer-bg: #FFFFFF;        /* Crisp White for Footer */
 
-  /* Product Specific Tints */
-  --color-mango-bg: #FFF1C5;
-  --color-chikku-bg: #D8ECE4;
-  --color-jackfruit-bg: #FED0C7;
-  --color-banana-bg: #D0E5F7;
+  /* Product Specific Card Tints (Matched to Reference Screenshot) */
+  --color-mango-bg: #FFF0BE;         /* Warm Honey Cream */
+  --color-chikku-bg: #D4EDE2;        /* Fresh Mint Seafoam */
+  --color-jackfruit-bg: #FED0C7;     /* Soft Coral Peach */
+  --color-banana-bg: #D0E5F7;        /* Soft Sky Blue */
 
   /* Bento Card Tints */
   --bento-brown: #3E3028;
@@ -36,8 +37,8 @@
   --text-dark: #111111;
   --text-dark-muted: #555555;
   --text-light: #FFFFFF;
-  --text-light-muted: #A3A3A3;
-  --text-light-subtle: #737373;
+  --text-light-muted: #666666;
+  --text-light-subtle: #888888;
 
   /* Premium Typography Scale */
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

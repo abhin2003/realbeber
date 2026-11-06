@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProductGrid();
 
   // Initialize UI Controllers
+  initHeroCarousel();
   initMobileMenu();
   initSearch();
   initQuickView();
@@ -67,6 +68,137 @@ function renderProductGrid() {
       </div>
     </article>
   `).join('');
+}
+
+/**
+ * Auto-Changing Hero Slideshow Carousel
+ * Automatically cycles through the 4 confirmed fruit varieties every 8 seconds.
+ * Features simple centered dot indicators and interactive swipe/scroll-to-change.
+ */
+function initHeroCarousel() {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  const flavorBadge = document.getElementById('currentHeroFlavor');
+  const wrapper = document.getElementById('heroVisualCol');
+
+  if (!slides.length) return;
+
+  let currentIndex = 0;
+  let timer = null;
+  const intervalMs = 8000; // Changes with time every 8 seconds
+
+  function goToSlide(index) {
+    slides[currentIndex]?.classList.remove('active');
+    dots[currentIndex]?.classList.remove('active');
+
+    currentIndex = (index + slides.length) % slides.length;
+
+    const nextSlide = slides[currentIndex];
+    nextSlide?.classList.add('active');
+    dots[currentIndex]?.classList.add('active');
+
+    if (flavorBadge && nextSlide) {
+      const flavor = nextSlide.getAttribute('data-flavor');
+      if (flavor) flavorBadge.textContent = flavor;
+    }
+  }
+
+  function nextSlide() {
+    goToSlide(currentIndex + 1);
+  }
+
+  function prevSlide() {
+    goToSlide(currentIndex - 1);
+  }
+
+  function startTimer() {
+    stopTimer();
+    timer = setInterval(nextSlide, intervalMs);
+  }
+
+  function stopTimer() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+  }
+
+  // Centered Dots Navigation
+  dots.forEach((dot, idx) => {
+    dot.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToSlide(idx);
+      startTimer();
+    });
+  });
+
+  // Swipe / Scroll to Next and Previous
+  let startX = 0;
+  let isDragging = false;
+
+  // Touch Swipe
+  wrapper?.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    stopTimer();
+  }, { passive: true });
+
+  wrapper?.addEventListener('touchend', (e) => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    if (diff > 40) {
+      // Swiped left -> scroll to the right (next slide)
+      nextSlide();
+    } else if (diff < -40) {
+      // Swiped right -> previous slide
+      prevSlide();
+    }
+    startTimer();
+  }, { passive: true });
+
+  // Mouse Drag / Swipe
+  wrapper?.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX;
+    stopTimer();
+  });
+
+  window.addEventListener('mouseup', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    const diff = startX - e.clientX;
+    if (diff > 45) {
+      nextSlide();
+    } else if (diff < -45) {
+      prevSlide();
+    }
+    startTimer();
+  });
+
+  // Horizontal Wheel / Trackpad Scroll
+  let wheelTimeout = null;
+  wrapper?.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaX) > 25) {
+      e.preventDefault();
+      if (!wheelTimeout) {
+        if (e.deltaX > 25) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+        startTimer();
+        wheelTimeout = setTimeout(() => {
+          wheelTimeout = null;
+        }, 500);
+      }
+    }
+  }, { passive: false });
+
+  // Pause timer on hover, resume on leave
+  wrapper?.addEventListener('mouseenter', stopTimer);
+  wrapper?.addEventListener('mouseleave', startTimer);
+
+  // Start 8-second auto-timer
+  startTimer();
 }
 
 /**
