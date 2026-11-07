@@ -156,3 +156,4 @@ class MainApp {
 window.addEventListener('DOMContentLoaded', () => {
   window.mainApp = new MainApp();
 });
+

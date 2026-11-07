@@ -19,15 +19,25 @@
 }
 
 /* Reset & Base */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html {
+  background-color: var(--pale-sand);
+}
+
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+body {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   background-color: var(--pale-sand);
   color: var(--dark-ink);
   font-family: var(--font-sans);
@@ -46,12 +56,14 @@ html, body {
   z-index: 1;
   pointer-events: auto;
   cursor: grab;
+  touch-action: pan-y;
 }
 
 #webgl-canvas-container canvas {
   width: 100%;
   height: 100%;
   display: block;
+  touch-action: pan-y;
 }
 
 /* =========================================
@@ -223,13 +235,26 @@ html, body {
   transition: height 0.2s ease;
 }
 
-.audio-active .audio-equalizer span:nth-child(1) { animation: soundBar 0.8s infinite ease-in-out alternate; }
-.audio-active .audio-equalizer span:nth-child(2) { animation: soundBar 0.6s infinite ease-in-out alternate 0.2s; }
-.audio-active .audio-equalizer span:nth-child(3) { animation: soundBar 1.0s infinite ease-in-out alternate 0.4s; }
+.audio-active .audio-equalizer span:nth-child(1) {
+  animation: soundBar 0.8s infinite ease-in-out alternate;
+}
+
+.audio-active .audio-equalizer span:nth-child(2) {
+  animation: soundBar 0.6s infinite ease-in-out alternate 0.2s;
+}
+
+.audio-active .audio-equalizer span:nth-child(3) {
+  animation: soundBar 1.0s infinite ease-in-out alternate 0.4s;
+}
 
 @keyframes soundBar {
-  0% { height: 4px; }
-  100% { height: 14px; }
+  0% {
+    height: 4px;
+  }
+
+  100% {
+    height: 14px;
+  }
 }
 
 /* =========================================
@@ -369,7 +394,8 @@ html, body {
   position: relative;
   width: 100%;
   z-index: 10;
-  pointer-events: none; /* Let canvas capture drag interactions unless on buttons */
+  pointer-events: none;
+  /* Let canvas capture drag interactions unless on buttons */
 }
 
 .editorial-section {
@@ -792,21 +818,27 @@ html, body {
   .floating-hud-header {
     padding: 18px 20px;
   }
+
   .hud-nav-links {
     display: none;
   }
+
   .hud-swatch-chip {
     display: none;
   }
+
   .telemetry-hud-left {
     left: 18px;
   }
+
   .editorial-section {
     padding: 0 5vw;
   }
+
   .portal-headline {
     font-size: 2.5rem;
   }
+
   .oversized-block-title,
   .jackfruit-title,
   .chikoo-title,

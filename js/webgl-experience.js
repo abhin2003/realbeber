@@ -379,17 +379,21 @@ class WebGLExperience {
       }
     });
 
-    // Click & Drag 360° Fruit Inspection
+    // Click & Drag 360° Fruit Inspection (Mouse only to allow touch-scroll on mobile)
     this.container.addEventListener('pointerdown', (e) => {
-      this.isDragging = true;
-      this.dragStart = { x: e.clientX, y: e.clientY };
-      this.container.style.cursor = 'grabbing';
-      audioEngine.playClick();
+      if (e.pointerType === 'mouse') {
+        this.isDragging = true;
+        this.dragStart = { x: e.clientX, y: e.clientY };
+        this.container.style.cursor = 'grabbing';
+        audioEngine.playClick();
+      }
     });
 
     window.addEventListener('pointerup', () => {
-      this.isDragging = false;
-      this.container.style.cursor = 'grab';
+      if (this.isDragging) {
+        this.isDragging = false;
+        this.container.style.cursor = 'grab';
+      }
     });
   }
 
