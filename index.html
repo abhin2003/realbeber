@@ -3,918 +3,217 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Realbeber & Co. — Real Fruit. Remarkable Crunch. | Freeze-Dried Fruit Snacks</title>
-  <meta name="description" content="100% Freeze-dried fruit chips from God's Own Country, Kerala. Zero added oil, zero refined sugar, zero preservatives. Mango, Chikku, Jackfruit & Banana Frost Chips.">
+  <title>REALBEBER — Museum-Grade 3D Fruit Dimension</title>
+  <meta name="description" content="An interactive 3D digital art installation for REALBEBER, futuristic luxury freeze-dried fruit chips from Kerala. Real Fruit. Remarkable Crunch.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/logo_dark.png">
 
-  <!-- Core & Component CSS -->
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/interactive.css">
-  <link rel="stylesheet" href="css/responsive.css">
+  <!-- Google Fonts: Syne (Brutalist Display), Space Grotesk (Editorial Mono), Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Museum-Grade 3D Styles -->
+  <link rel="stylesheet" href="css/museum-style.css">
 </head>
 <body>
 
-  <!-- Outer Black Framing Wrapper -->
-  <div class="page-wrapper">
+  <!-- 1. Master Fixed 3D WebGL Canvas -->
+  <div id="webgl-canvas-container" aria-hidden="true"></div>
 
-    <!-- 1. Top Announcement Bar -->
-    <aside class="announcement-bar" role="complementary" aria-label="Announcement">
-      <span class="announcement-dot" aria-hidden="true"></span>
-      <span>FRESH ORDERS IN KERALA &bull; FREE SHIPPING ON ORDERS OVER &#8377;499 &bull; 100% PURE FRUIT</span>
-    </aside>
-
-    <!-- 2. Main Site Navigation Header -->
-    <header class="site-header" role="banner">
-      <!-- Brand Logo -->
-      <a href="#" class="brand-logo-link" aria-label="Realbeber & Co. Home">
-        <span class="brand-logo-mark">Realbeber</span>
-        <span class="brand-logo-sub">&amp; co.</span>
-        <span class="brand-logo-dot" aria-hidden="true"></span>
-      </a>
-
-      <!-- Desktop Nav Menu -->
-      <nav class="nav-menu" aria-label="Primary Navigation">
-        <a href="#fruitTransformationSection" class="nav-link">3D Experience</a>
-        <a href="#products" class="nav-link">Products</a>
-        <a href="#fruitExplorerSection" class="nav-link">3D Explorer</a>
-        <a href="#science" class="nav-link">Science</a>
-        <a href="#crunchPlaygroundSection" class="nav-link">Playground</a>
-        <a href="#momentsSection" class="nav-link">Moments</a>
-        <a href="#faq" class="nav-link">FAQ</a>
+  <!-- 2. Floating Minimal HUD Navigation -->
+  <header class="floating-hud-header" role="banner">
+    <div class="hud-left-group">
+      <button class="hud-hamburger-btn" id="menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <a href="#" class="hud-brand-logo">REALBEBER</a>
+      <nav class="hud-nav-links" aria-label="Primary">
+        <a href="#section-portal">HOME</a>
+        <a href="#section-mango">ADVANTAGES</a>
+        <a href="#section-finale">BUSINESS</a>
+        <a href="#section-finale">CONTACTS</a>
       </nav>
+    </div>
 
-      <!-- Action Controls -->
-      <div class="header-actions">
-        <!-- Search Trigger -->
-        <button class="header-icon-btn search-trigger-btn" aria-label="Search fruit snacks">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.3-4.3"/>
-          </svg>
-        </button>
+    <div class="hud-right-actions">
+      <!-- Color Swatches -->
+      <span class="hud-swatch-chip hud-swatch-tangerine">#FF6A2A</span>
+      <span class="hud-swatch-chip hud-swatch-lavender">Soft Lavender</span>
+      <span class="hud-swatch-chip hud-swatch-sand">Pale Sand</span>
 
-        <!-- Shopping Cart Trigger -->
-        <button class="header-icon-btn cart-trigger-btn" aria-label="View shopping bag">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-            <path d="M3 6h18"/>
-            <path d="M16 10a4 4 0 0 1-8 0"/>
-          </svg>
-          <span class="cart-count-badge">1</span>
-        </button>
-
-        <!-- Mobile Menu Hamburger -->
-        <button class="header-icon-btn mobile-menu-btn" id="mobileMenuToggle" aria-label="Open mobile menu">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="4" x2="20" y1="12" y2="12"/>
-            <line x1="4" x2="20" y1="6" y2="6"/>
-            <line x1="4" x2="20" y1="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- 3. Hero Section (Split Yellow & Photographic Hero) -->
-    <section class="section-card hero-section" id="about" aria-label="Introduction">
-      <div class="hero-content-col">
-        <span class="pill-badge hero-pill-tag" id="heroFlavorBadge">
-          REAL SNACKS. REAL ENERGY. &bull; <strong id="currentHeroFlavor">MANGO</strong>
-        </span>
-        <h1 class="hero-title">
-          SNACK<br>
-          SMARTER<br>
-          LIVE BRIGHTER
-        </h1>
-        <p class="hero-subtitle">
-          Plant-based snacks with big flavor and clean ingredients. Better for your body, better for your day. Zero added oil, zero refined sugar.
-        </p>
-        <a href="#products" class="pill-btn pill-btn-black hero-cta-btn">
-          <span>Shop now</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-          </svg>
-        </a>
-      </div>
-
-      <div class="hero-visual-col" id="heroVisualCol">
-        <div class="hero-slides-wrapper" id="heroSlidesWrapper">
-          <div class="hero-slide active" data-flavor="MANGO" data-index="0">
-            <img 
-              src="assets/hero/hero_mango.jpg" 
-              alt="Realbeber Freeze-Dried Mango Frost Chips with floating mango crisps" 
-              class="hero-photography-img"
-              loading="eager"
-            >
-          </div>
-          <div class="hero-slide" data-flavor="JACKFRUIT" data-index="1">
-            <img 
-              src="assets/hero/hero_jackfruit.jpg" 
-              alt="Realbeber Freeze-Dried Jackfruit Frost Chips with floating jackfruit crisps" 
-              class="hero-photography-img"
-              loading="lazy"
-            >
-          </div>
-          <div class="hero-slide" data-flavor="BANANA" data-index="2">
-            <img 
-              src="assets/hero/hero_banana.jpg" 
-              alt="Realbeber Freeze-Dried Banana Frost Chips with floating banana crisps" 
-              class="hero-photography-img"
-              loading="lazy"
-            >
-          </div>
-          <div class="hero-slide" data-flavor="CHIKKU" data-index="3">
-            <img 
-              src="assets/hero/hero_chikku.jpg" 
-              alt="Realbeber Freeze-Dried Chikku Frost Chips with floating chikku crisps" 
-              class="hero-photography-img"
-              loading="lazy"
-            >
-          </div>
+      <!-- Audio Engine Sound Wave Toggle -->
+      <button class="hud-icon-btn" id="audio-toggle" aria-label="Toggle dimensional ambient soundscape" title="Toggle Sound">
+        <div class="audio-equalizer">
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
+      </button>
 
-        <!-- Simple Centered Dots -->
-        <div class="hero-carousel-dots" id="heroDots" role="tablist" aria-label="Hero fruit slides">
-          <button class="hero-dot active" data-slide="0" aria-label="Slide 1: Mango"></button>
-          <button class="hero-dot" data-slide="1" aria-label="Slide 2: Jackfruit"></button>
-          <button class="hero-dot" data-slide="2" aria-label="Slide 3: Banana"></button>
-          <button class="hero-dot" data-slide="3" aria-label="Slide 4: Chikku"></button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. Pill Badges Scrolling Strip -->
-    <section class="marquee-strip" aria-label="Brand Features">
-      <div class="marquee-track">
-        <span class="marquee-pill pill-color-1">100% Tree Ripened</span>
-        <span class="marquee-pill pill-color-2">Sub-Zero Freeze Dried</span>
-        <span class="marquee-pill pill-color-3">Zero Added Sugar</span>
-        <span class="marquee-pill pill-color-4">Oil-Free Crunch</span>
-        <span class="marquee-pill pill-color-5">Non-GMO Certified</span>
-        <span class="marquee-pill pill-color-6">No Preservatives</span>
-        <span class="marquee-pill pill-color-7">Gluten Free</span>
-        <span class="marquee-pill pill-color-8">Night Owl Binge-Saver</span>
-        <span class="marquee-pill pill-color-9">Pure Real Fruit</span>
-        <span class="marquee-pill pill-color-10">Crisp Feather Texture</span>
-        <span class="marquee-pill pill-color-11">Plant-Based Goodness</span>
-        <span class="marquee-pill pill-color-12">No Artificial Colors</span>
-        <span class="marquee-pill pill-color-13">God's Own Country</span>
-
-        <!-- Duplicated for seamless infinite CSS marquee loop -->
-        <span class="marquee-pill pill-color-1">100% Tree Ripened</span>
-        <span class="marquee-pill pill-color-2">Sub-Zero Freeze Dried</span>
-        <span class="marquee-pill pill-color-3">Zero Added Sugar</span>
-        <span class="marquee-pill pill-color-4">Oil-Free Crunch</span>
-        <span class="marquee-pill pill-color-5">Non-GMO Certified</span>
-        <span class="marquee-pill pill-color-6">No Preservatives</span>
-        <span class="marquee-pill pill-color-7">Gluten Free</span>
-        <span class="marquee-pill pill-color-8">Night Owl Binge-Saver</span>
-        <span class="marquee-pill pill-color-9">Pure Real Fruit</span>
-        <span class="marquee-pill pill-color-10">Crisp Feather Texture</span>
-        <span class="marquee-pill pill-color-11">Plant-Based Goodness</span>
-        <span class="marquee-pill pill-color-12">No Artificial Colors</span>
-        <span class="marquee-pill pill-color-13">God's Own Country</span>
-      </div>
-    </section>
-
-    <!-- 4B. SIGNATURE EXPERIENCE: 3D SCROLL-DRIVEN FRUIT TRANSFORMATION -->
-    <section class="transformation-section" id="fruitTransformationSection" aria-label="3D Fruit Transformation Experience">
-      <div class="transformation-sticky-stage">
-        <!-- Pinned Three.js WebGL Canvas -->
-        <div class="transformation-canvas-wrap">
-          <canvas class="transformation-canvas"></canvas>
-        </div>
-
-        <!-- Scroll Storytelling Cards -->
-        <div class="transformation-cards-col">
-          <!-- Scene 1: Whole Organic Fruit -->
-          <div class="transformation-card is-active" data-scene="1">
-            <span class="transformation-card-badge">
-              <span style="width: 8px; height: 8px; border-radius: 50%; background: #111111; display: inline-block;"></span>
-              Scene 01 &bull; Real Fruit
-            </span>
-            <h2 class="transformation-heading">It starts with something real.</h2>
-            <p class="transformation-desc">
-              Good things begin with the fruits we know and love. Tree-ripened Kerala Alphonso mangoes, harvested at peak sun sweetness and bursting with pure tropical essence.
-            </p>
-            <span class="transformation-hint">&darr; Scroll down to freeze-dry</span>
-          </div>
-
-          <!-- Scene 2: Sub-Zero Sublimation Crunch -->
-          <div class="transformation-card" data-scene="2">
-            <span class="transformation-card-badge">
-              <span style="width: 8px; height: 8px; border-radius: 50%; background: #D97706; display: inline-block;"></span>
-              Scene 02 &bull; Sublimation
-            </span>
-            <h2 class="transformation-heading">A little change. A whole new crunch.</h2>
-            <p class="transformation-desc">
-              Discover fruit in a completely different form. Sub-zero sublimation flash-freezes water molecules into ethereal crunch, locking in 98% of living nutrients without a drop of frying oil.
-            </p>
-            <span class="transformation-hint">&darr; Scroll down for product reveal</span>
-          </div>
-
-          <!-- Scene 3: The 3D Product Pouch Reveal -->
-          <div class="transformation-card" data-scene="3">
-            <span class="transformation-card-badge">
-              <span style="width: 8px; height: 8px; border-radius: 50%; background: #059669; display: inline-block;"></span>
-              Scene 03 &bull; The Reveal
-            </span>
-            <h2 class="transformation-heading">Meet your new favourite crunch.</h2>
-            <p class="transformation-desc">
-              Featherweight, intensely flavorful, and undeniably crisp. Pure Kerala Mango Frost Chips sealed in 3D for peak fresh-picked crunch anywhere your day takes you.
-            </p>
-            <div class="transformation-actions">
-              <a href="#fruitExplorerSection" class="pill-btn pill-btn-black">
-                <span>Explore Mango</span>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-              </a>
-              <button class="pill-btn pill-btn-white" onclick="window.cart.addItem('mango-frost-chips', 1); window.cart.showToast('Added Mango Frost Chips to bag!');">
-                <span>Add &bull; &#8377;149</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Scroll Progress Tracker -->
-        <div class="transformation-progress-container">
-          <div class="transformation-progress-track">
-            <div class="transformation-progress-fill"></div>
-          </div>
-          <span class="transformation-hint">3D Scroll Sequence</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. Product Collection Section ("SNACKS YOU'LL LOVE") -->
-    <section class="section-card product-collection-section" id="products" aria-label="Snack Collection">
-      <div class="section-header-row">
-        <div>
-          <span class="section-label-top">OUR FAVORITES</span>
-          <h2 class="section-main-heading">SNACKS YOU'LL LOVE</h2>
-        </div>
-        <a href="#products" class="section-view-all-link">
-          <span>View all</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-          </svg>
-        </a>
-      </div>
-
-      <!-- 4 Horizontally Arranged Product Cards -->
-      <div class="product-grid" id="productGrid">
-        <!-- Rendered dynamically by js/app.js from PRODUCTS catalog -->
-      </div>
-    </section>
-
-    <!-- 5B. FOUR INTERACTIVE FRUIT 3D EXPLORER -->
-    <section class="explorer-section" id="fruitExplorerSection" aria-label="Interactive 3D Fruit Explorer">
-      <div class="explorer-header">
-        <div>
-          <span class="pill-badge" style="background: rgba(17,17,17,0.06); color: #111111; margin-bottom: 10px;">3D Interactive Showcase</span>
-          <h2 style="font-family: var(--font-display); font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 900; text-transform: uppercase;">
-            Explore The Four Fruits
-          </h2>
-        </div>
-        <div class="explorer-tabs-wrap">
-          <button class="fruit-tab-btn active" data-index="0" style="border-color: #FFB638;">
-            <span class="fruit-tab-dot" style="background-color: #FFB638;"></span>
-            <span>Mango</span>
-          </button>
-          <button class="fruit-tab-btn" data-index="1">
-            <span class="fruit-tab-dot" style="background-color: #A87954;"></span>
-            <span>Chikku</span>
-          </button>
-          <button class="fruit-tab-btn" data-index="2">
-            <span class="fruit-tab-dot" style="background-color: #E6A817;"></span>
-            <span>Jackfruit</span>
-          </button>
-          <button class="fruit-tab-btn" data-index="3">
-            <span class="fruit-tab-dot" style="background-color: #E8CA55;"></span>
-            <span>Banana</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="explorer-grid">
-        <div class="explorer-canvas-container">
-          <div class="explorer-stage-glow"></div>
-          <canvas class="explorer-3d-canvas"></canvas>
-          <div class="explorer-drag-hint">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m14 7-5 5 5 5"/></svg>
-            <span>Drag to Rotate 360&deg;</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m10 17 5-5-5-5"/></svg>
-          </div>
-        </div>
-
-        <div class="explorer-info-col">
-          <span class="explorer-origin-tag" id="explorerFruitOrigin">Palakkad &amp; Malappuram, Kerala</span>
-          <h3 class="explorer-fruit-title" id="explorerFruitTitle">Mango Frost Chips</h3>
-          <p class="explorer-tagline" id="explorerFruitTagline">A tropical favourite. A different kind of crunch.</p>
-          <p class="explorer-desc" id="explorerFruitDesc">
-            100% pure Kerala Alphonso &amp; local mangoes, harvested at peak sun sweetness and freeze-dried at sub-zero temperatures.
-          </p>
-
-          <div class="explorer-specs-row">
-            <div class="explorer-spec-item">
-              <span class="spec-label">Price</span>
-              <span class="spec-val" id="explorerFruitPrice">&#8377;149</span>
-            </div>
-            <div class="explorer-spec-item">
-              <span class="spec-label">Net Weight</span>
-              <span class="spec-val" id="explorerFruitWeight">35g (from 350g fresh fruit)</span>
-            </div>
-            <div class="explorer-spec-item">
-              <span class="spec-label">Purity</span>
-              <span class="spec-val" style="color: var(--color-leaf-green);">100% Real Fruit</span>
-            </div>
-          </div>
-
-          <div class="explorer-cta-row">
-            <button class="pill-btn pill-btn-black" id="explorerAddBtn">
-              <span>Add to Bag</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </button>
-            <button class="pill-btn pill-btn-white" onclick="openQuickView('mango-frost-chips')">View Nutrition Dossier</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 6. Benefits & Science Section ("Your tongue knows. So does science.") -->
-    <section class="section-card benefits-section" id="science" aria-label="Benefits and Science">
-      <div class="benefits-intro">
-        <span class="pill-badge benefits-pill-tag">BENEFITS</span>
-        <h2 class="benefits-heading">
-          Your tongue knows.<br>
-          <em>So does science.</em>
-        </h2>
-        <p class="benefits-subtext">
-          Zero shortcuts. Sub-zero sublimation seals in 98% of micronutrients while preserving the pure flavor and texture of fresh-picked fruit.
-        </p>
-      </div>
-
-      <!-- Asymmetric Bento Mosaic Grid -->
-      <div class="bento-grid">
-        <!-- Card 1: Top Left Brown -->
-        <article class="bento-card bento-card-1">
-          <div class="bento-card-header">
-            <div class="bento-icon-circle">&#9679;</div>
-          </div>
-          <h3 class="bento-card-title">Better crunch, better you</h3>
-          <p class="bento-card-desc">
-            Locking in enzymes, potassium, and active antioxidants using sub-zero sublimation that fuels your daily life.
-          </p>
-        </article>
-
-        <!-- Card 2: Top Center Amber -->
-        <article class="bento-card bento-card-2">
-          <div class="bento-card-header">
-            <div class="bento-icon-circle">+</div>
-          </div>
-          <h3 class="bento-card-title">Daily movement starts from pure fruit</h3>
-          <p class="bento-card-desc">
-            Natural fruit fructose gives sustained clean stamina with zero energy crashes or oil bloat.
-          </p>
-        </article>
-
-        <!-- Card 3: Tall Right Coral Card (Jackfruit Frost Chips Hero Card) -->
-        <article class="bento-card bento-card-3">
-          <div>
-            <span class="bento-tag-sm">SNACK SMARTER</span>
-            <h3 class="bento-tall-title">A featherweight pouch with heavyweight flavor</h3>
-          </div>
-
-          <div class="bento-pouch-container">
-            <img 
-              src="assets/products/jackfruit_clean_pouch.png" 
-              alt="Jackfruit Frost Chips pouch showcase" 
-              class="bento-tall-pouch"
-              loading="lazy"
-            >
-          </div>
-
-          <div class="bento-tall-bottom">
-            <span>100% Kerala Golden Petals</span>
-            <button class="pill-btn pill-btn-white" style="padding: 6px 14px; font-size: 0.72rem;" onclick="openQuickView('jackfruit-frost-chips')">
-              Quick View
-            </button>
-          </div>
-        </article>
-
-        <!-- Card 4: Bottom Left Green -->
-        <article class="bento-card bento-card-4">
-          <div class="bento-card-header">
-            <span class="pill-badge" style="background-color: rgba(255,255,255,0.2);">KERALA ORIGIN</span>
-          </div>
-          <div>
-            <h3 class="bento-card-title">Harvested at peak sun sweetness</h3>
-            <p class="bento-card-desc">
-              Sourced straight from certified small-holder organic family groves in the Western Ghats.
-            </p>
-            <a href="#philosophy" class="bento-link">
-              Explore Kerala harvest &rarr;
-            </a>
-          </div>
-        </article>
-
-        <!-- Card 5: Bottom Middle Small Dark -->
-        <article class="bento-card bento-card-5">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-            <span style="font-size: 0.65rem; font-weight: 800; color: #F59E0B; letter-spacing: 0.08em;">100% PURITY</span>
-            <span style="font-size: 0.75rem; font-weight: 800;">1 Ingredient Only</span>
-          </div>
-          <p class="bento-card-desc" style="font-size: 0.75rem;">
-            0 Added Sugar &bull; 0 Cooking Oil &bull; 0 Preservatives.
-          </p>
-        </article>
-
-        <!-- Card 6: Middle Bottom Coral -->
-        <article class="bento-card bento-card-6">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-            <span style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">Crunch Factor</span>
-            <span style="font-size: 0.8rem;">&#10003;</span>
-          </div>
-          <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 4px;">Clean never tasted this loud</h4>
-          <p class="bento-card-desc" style="font-size: 0.75rem;">
-            No sticky fingers, no greasy residue. Just loud, airy, shatteringly crisp fruit.
-          </p>
-        </article>
-
-        <!-- Card 7: Bottom Right Sand -->
-        <article class="bento-card bento-card-7">
-          <div>
-            <span style="font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #777777;">WEIGHT RATIO</span>
-            <div style="font-weight: 900; font-size: 0.95rem;">10 : 1 Fresh to Crisp</div>
-          </div>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.7;">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
-        </article>
-      </div>
-    </section>
-
-    <!-- 6B. INTERACTIVE FRUIT PLAYGROUND ("TURN UP THE CRUNCH") -->
-    <section class="playground-section" id="crunchPlaygroundSection" aria-label="Interactive Fruit Playground">
-      <div class="playground-header">
-        <span class="playground-badge">Playful Experience</span>
-        <h2 class="playground-title">Turn Up The Crunch</h2>
-        <p class="playground-subtitle">
-          Grab, toss, or tap falling freeze-dried fruit pieces into the Realbeber pouch to fill the crunch meter and unlock an exclusive reward!
-        </p>
-      </div>
-
-      <div class="playground-hud">
-        <span class="hud-counter">Crunch Meter: <strong id="crunchMeterCount">0/10</strong></span>
-        <div class="hud-progress-bar">
-          <div class="hud-progress-fill" id="crunchMeterBar"></div>
-        </div>
-        <button class="hud-reset-btn" id="playgroundResetBtn">Reset</button>
-      </div>
-
-      <div class="playground-canvas-wrap">
-        <canvas class="playground-canvas" id="crunchPlaygroundCanvas"></canvas>
-
-        <!-- Unlocked Celebration Reward Modal -->
-        <div class="playground-reward-modal" id="playgroundRewardModal">
-          <span style="font-size: 2.8rem; margin-bottom: 8px;">🎉</span>
-          <h3 class="reward-title">Master Cruncher Unlocked!</h3>
-          <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; max-width: 440px; margin-bottom: 8px;">
-            You packed a full pouch of Realbeber crispness! Enjoy an exclusive 15% perk off your order:
-          </p>
-          <div class="reward-code-box" onclick="navigator.clipboard.writeText('CRUNCH15'); window.cart.showToast('Copied discount code CRUNCH15!');">
-            CRUNCH15 &bull; TAP TO COPY
-          </div>
-          <button class="pill-btn pill-btn-white" onclick="document.getElementById('playgroundRewardModal').classList.remove('is-visible');">
-            Keep Playing
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. Brand Philosophy & Ingredients ("GOOD INGREDIENTS. GREAT TASTE.") -->
-    <section class="section-card philosophy-section" id="philosophy" aria-label="Brand Philosophy">
-      <div class="philosophy-left">
-        <h2 class="philosophy-heading">
-          GOOD<br>
-          INGREDIENTS.<br>
-          GREAT TASTE.
-        </h2>
-        <a href="#science" class="pill-btn pill-btn-black philosophy-cta-btn">
-          <span>Learn more</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-          </svg>
-        </a>
-      </div>
-
-      <div class="philosophy-right-grid">
-        <!-- Vignette 1: Real Kerala Fruit -->
-        <div class="philosophy-item">
-          <div class="philosophy-circle-wrap">
-            <img 
-              src="assets/images/philosophy_kerala_harvest.jpg" 
-              alt="Fresh sun-drenched Kerala fruit harvest" 
-              class="philosophy-circle-img"
-              loading="lazy"
-            >
-          </div>
-          <h3 class="philosophy-item-title">REAL KERALA FRUIT</h3>
-          <p class="philosophy-item-desc">
-            Produce nurtured by tropical monsoon rains and rich Western Ghats soil.
-          </p>
-        </div>
-
-        <!-- Vignette 2: Natural Crunch -->
-        <div class="philosophy-item">
-          <div class="philosophy-circle-wrap">
-            <img 
-              src="assets/images/philosophy_freeze_dry.jpg" 
-              alt="Macro view of porous freeze-dried fruit honeycomb texture" 
-              class="philosophy-circle-img"
-              loading="lazy"
-            >
-          </div>
-          <h3 class="philosophy-item-title">NATURAL CRUNCH</h3>
-          <p class="philosophy-item-desc">
-            Sub-zero sublimation locks in cellular walls with zero frying oil.
-          </p>
-        </div>
-
-        <!-- Vignette 3: Plant Powered -->
-        <div class="philosophy-item">
-          <div class="philosophy-circle-wrap">
-            <img 
-              src="assets/images/philosophy_plant_snack.jpg" 
-              alt="Plant-based snack bowl with pure fruit chips" 
-              class="philosophy-circle-img"
-              loading="lazy"
-            >
-          </div>
-          <h3 class="philosophy-item-title">PLANT POWERED</h3>
-          <p class="philosophy-item-desc">
-            Good nutrients made lighter and healthier for your vibrant daily pursuit.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 8. Final Promotional Banner ("CRISPY, CRUNCHY, IRRESISTIBLE") -->
-    <section class="section-card promo-banner-section" aria-label="Featured Promo">
-      <div class="promo-image-col">
-        <img 
-          src="assets/images/banner_lifestyle.jpg" 
-          alt="Warm lifestyle setting with bowls of Realbeber freeze-dried fruit chips and morning sunlight" 
-          class="promo-lifestyle-img"
-          loading="lazy"
-        >
-      </div>
-
-      <div class="promo-content-col">
-        <div class="promo-text-wrap">
-          <span class="promo-flavor-tag">NEW FLAVOR</span>
-          <h2 class="promo-heading">
-            CRISPY,<br>
-            CRUNCHY,<br>
-            IRRESISTIBLE
-          </h2>
-          <p class="promo-description">
-            Our new Kerala Mango variety is here. All the real fruit flavor, none of the oil.
-          </p>
-          <button class="pill-btn pill-btn-black" onclick="openQuickView('mango-frost-chips')">
-            <span>Shop now</span>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="promo-inset-circle" aria-hidden="true">
-          <img src="assets/images/philosophy_plant_snack.jpg" alt="Crunchy fruit bowl inset">
-        </div>
-      </div>
-    </section>
-
-    <!-- 8B. LIFESTYLE MOMENTS HORIZONTAL DRAGGABLE GALLERY -->
-    <section class="moments-section" id="momentsSection" aria-label="Everyday Lifestyle Moments">
-      <div class="moments-header-row">
-        <div>
-          <span class="pill-badge" style="background: rgba(17,17,17,0.06); color: #111111; margin-bottom: 10px;">Lifestyle &bull; In The Wild</span>
-          <h2 style="font-family: var(--font-display); font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 900; text-transform: uppercase;">
-            Good Moments Deserve A Little Crunch
-          </h2>
-        </div>
-        <div class="moments-nav-controls">
-          <button class="moments-nav-btn prev" aria-label="Previous moments">&larr;</button>
-          <button class="moments-nav-btn next" aria-label="Next moments">&rarr;</button>
-        </div>
-      </div>
-
-      <div class="moments-track-container">
-        <div class="moments-track">
-          <!-- Moment 1: Work & Focus -->
-          <article class="moment-card">
-            <div class="moment-img-wrap">
-              <img src="assets/images/moment_work.jpg" alt="Work and focus snacking with Realbeber" class="moment-img" loading="lazy">
-              <span class="moment-tag">Work &bull; Focus</span>
-            </div>
-            <div class="moment-content">
-              <h3 class="moment-title">Studio &amp; Desk Fuel</h3>
-              <p class="moment-desc">Zero greasy fingers on keyboards. Pure sustained natural fruit energy for deep work sprints.</p>
-            </div>
-          </article>
-
-          <!-- Moment 2: Outdoor Adventure -->
-          <article class="moment-card">
-            <div class="moment-img-wrap">
-              <img src="assets/images/moment_adventure.jpg" alt="Western Ghats trail hike with Realbeber" class="moment-img" loading="lazy">
-              <span class="moment-tag">Trail &bull; Adventure</span>
-            </div>
-            <div class="moment-content">
-              <h3 class="moment-title">Summit Overlooks</h3>
-              <p class="moment-desc">Ultralight featherweight pack for mountain treks in Kerala with 98% locked-in nutrients.</p>
-            </div>
-          </article>
-
-          <!-- Moment 3: Travel & Road Trip -->
-          <article class="moment-card">
-            <div class="moment-img-wrap">
-              <img src="assets/images/moment_travel.jpg" alt="Coastal road trip snacking" class="moment-img" loading="lazy">
-              <span class="moment-tag">Travel &bull; Coastal</span>
-            </div>
-            <div class="moment-content">
-              <h3 class="moment-title">Golden Hour Drives</h3>
-              <p class="moment-desc">Passing around real tropical crunch on highway getaways without chocolate melting in the heat.</p>
-            </div>
-          </article>
-
-          <!-- Moment 4: Evening Relaxation -->
-          <article class="moment-card">
-            <div class="moment-img-wrap">
-              <img src="assets/images/moment_reading.jpg" alt="Cozy evening relaxation with fruit chips" class="moment-img" loading="lazy">
-              <span class="moment-tag">Hygge &bull; Evening</span>
-            </div>
-            <div class="moment-content">
-              <h3 class="moment-title">Guilt-Free Night Owls</h3>
-              <p class="moment-desc">0% added oil, 0% refined sugar. Savor real fruit crunch while getting lost in a good book.</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- 9. Interactive FAQ Section -->
-    <section class="section-card faq-section" id="faq" aria-label="Frequently Asked Questions">
-      <div class="faq-header">
-        <span class="pill-badge" style="background-color: rgba(255,255,255,0.1); color: var(--color-hero-yellow);">FAQ</span>
-        <h2 class="faq-title">Questions? We have answers.</h2>
-      </div>
-
-      <div class="faq-list">
-        <!-- FAQ 1 -->
-        <div class="faq-item active">
-          <button class="faq-question-btn" aria-expanded="true">
-            <span>How does sub-zero freeze drying work?</span>
-            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            Fresh Kerala fruits are flash-frozen to below -40°C. In a deep vacuum sublimation chamber, ice crystals vaporize directly into water vapor without ever melting into liquid. This retains 98% of natural vitamins, enzymes, and antioxidants while creating a delicate, airy crunch.
-          </div>
-        </div>
-
-        <!-- FAQ 2 -->
-        <div class="faq-item">
-          <button class="faq-question-btn" aria-expanded="false">
-            <span>Are there truly zero added sugars, oils, or chemicals?</span>
-            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            Yes, strictly 100% fruit. Every pack contains only ONE ingredient: the fruit named on the front (Mango, Chikku, Jackfruit, or Banana). No palm oil, no sunflower oil, no cane sugar, no sulphur dioxide, and zero artificial flavors.
-          </div>
-        </div>
-
-        <!-- FAQ 3 -->
-        <div class="faq-item">
-          <button class="faq-question-btn" aria-expanded="false">
-            <span>Where do the fruits come from?</span>
-            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            All our produce is procured directly from certified family farms across Kerala—from the legendary sweet mango orchards of Palakkad to Varikka jackfruit groves in the Western Ghats. We are proudly "From God's Own Country".
-          </div>
-        </div>
-
-        <!-- FAQ 4 -->
-        <div class="faq-item">
-          <button class="faq-question-btn" aria-expanded="false">
-            <span>How do I store Frost Chips after opening?</span>
-            <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            Because our freeze-dried chips are naturally moisture-free, they love staying dry. Seal the zip-lock firmly after every snack session or keep them in an airtight container to maintain maximum crunch!
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 10. Site Footer -->
-    <footer class="site-footer" role="contentinfo">
-      <div class="footer-top-grid">
-        <!-- Brand Info -->
-        <div class="footer-brand-col">
-          <div class="footer-brand-title">Realbeber &amp; Co.</div>
-          <p class="footer-brand-desc">
-            Real fruit from God's Own Country. 100% Freeze-dried to sub-zero perfection. Zero oil, zero junk, remarkable crunch.
-          </p>
-        </div>
-
-        <!-- Product Links -->
-        <div class="footer-nav-col">
-          <h4 class="footer-col-title">DISCOVER</h4>
-          <ul class="footer-links-list">
-            <li><a href="#products" class="footer-link" onclick="openQuickView('mango-frost-chips')">Mango Frost Chips</a></li>
-            <li><a href="#products" class="footer-link" onclick="openQuickView('chikku-frost-chips')">Chikku Frost Chips</a></li>
-            <li><a href="#products" class="footer-link" onclick="openQuickView('jackfruit-frost-chips')">Jackfruit Frost Chips</a></li>
-            <li><a href="#products" class="footer-link" onclick="openQuickView('banana-frost-chips')">Banana Frost Chips</a></li>
-            <li><a href="#products" class="footer-link">Annual Variety Taster</a></li>
-          </ul>
-        </div>
-
-        <!-- Mission Links -->
-        <div class="footer-nav-col">
-          <h4 class="footer-col-title">OUR MISSION</h4>
-          <ul class="footer-links-list">
-            <li><a href="#philosophy" class="footer-link">From Kerala Orchards</a></li>
-            <li><a href="#science" class="footer-link">Sub-Zero Freeze Tech</a></li>
-            <li><a href="#about" class="footer-link">Sustainability &amp; Farmers</a></li>
-            <li><a href="#faq" class="footer-link">Wholesale &amp; Cafes</a></li>
-          </ul>
-        </div>
-
-        <!-- Newsletter Column -->
-        <div class="footer-newsletter-col">
-          <h4 class="footer-col-title">GET 15% OFF FREE CRUNCH</h4>
-          <p class="footer-newsletter-text">
-            Subscribe to receive secret taster batches and seasonal Kerala harvests.
-          </p>
-          <form class="newsletter-form">
-            <input type="email" placeholder="Enter your email" class="newsletter-input" required aria-label="Email for newsletter">
-            <button type="submit" class="newsletter-submit-btn">Join</button>
-          </form>
-        </div>
-      </div>
-
-      <!-- Bottom Bar -->
-      <div class="footer-bottom-bar">
-        <div>&copy; 2026 Realbeber &amp; Co. All rights reserved. Made in Kerala, India.</div>
-        <div class="footer-legal-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-          <span style="opacity: 0.6;">FSSAI Certified</span>
-        </div>
-      </div>
-    </footer>
-
-  </div><!-- /page-wrapper -->
-
-  <!-- ========================================================================
-       SLIDE-OUT SHOPPING CART DRAWER
-       ======================================================================== -->
-  <div class="drawer-backdrop" id="cartBackdrop" aria-hidden="true"></div>
-  <aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Shopping Cart">
-    <!-- Drawer Header -->
-    <div class="cart-drawer-header">
-      <div class="cart-drawer-title-wrap">
-        <h3 class="cart-drawer-title">Your Crunch Bag</h3>
-        <span class="cart-drawer-badge"><span class="cart-count-badge">1</span> items</span>
-      </div>
-      <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close cart">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+      <!-- Search Trigger -->
+      <button class="hud-icon-btn" id="search-btn" aria-label="Search collection">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.3-4.3"/>
         </svg>
       </button>
-    </div>
 
-    <!-- Free Shipping Progress -->
-    <div class="shipping-bar-container">
-      <div class="shipping-bar-track">
-        <div class="shipping-bar-progress" id="shippingProgress"></div>
-      </div>
-      <div class="shipping-bar-message" id="shippingMessage">
-        Add <strong>₹350</strong> more for <strong>FREE shipping</strong>!
-      </div>
-    </div>
-
-    <!-- Cart Items Body -->
-    <div class="cart-items-body" id="cartItemsList">
-      <!-- Injected via js/cart.js -->
-    </div>
-
-    <!-- Empty State -->
-    <div class="cart-empty-state" id="cartEmptyState" style="display: none;">
-      <div class="cart-empty-icon">🥭</div>
-      <h4 class="cart-empty-title">Your crunch bag is empty</h4>
-      <p class="cart-empty-desc">Discover our 100% natural freeze-dried fruit chips from Kerala.</p>
-      <button class="pill-btn pill-btn-black" onclick="window.cart.closeDrawer()">Start Snacking</button>
-    </div>
-
-    <!-- Cart Drawer Footer -->
-    <div class="cart-drawer-footer" id="cartFooter">
-      <div class="cart-summary-row">
-        <span>Subtotal</span>
-        <span id="cartSubtotal">&#8377;149</span>
-      </div>
-      <div class="cart-summary-row">
-        <span>Shipping</span>
-        <span>Calculated at checkout</span>
-      </div>
-      <div class="cart-total-row">
-        <span>Estimated Total</span>
-        <span id="cartTotal">&#8377;149</span>
-      </div>
-      <button class="pill-btn pill-btn-black cart-checkout-btn" id="checkoutBtn">
-        Proceed to Checkout &bull; Demo
+      <!-- Cart Trigger -->
+      <button class="hud-icon-btn" id="cart-btn" aria-label="View shopping bag">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+          <path d="M3 6h18"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span class="cart-badge">0</span>
       </button>
-      <p class="cart-guarantee-note">&#128274; 100% Secure Checkout &bull; Direct Farm Fresh Dispatch</p>
+    </div>
+  </header>
+
+  <!-- 3. Left Telemetry HUD (Vertical Dimensional Scroll) -->
+  <aside class="telemetry-hud-left" aria-hidden="true">
+    <div class="telemetry-progress-track">
+      <span class="telemetry-arrow">↑</span>
+      <div class="telemetry-line">
+        <span class="telemetry-pip" id="telemetry-pip"></span>
+      </div>
+      <span class="telemetry-arrow">↓</span>
+    </div>
+    <div class="telemetry-labels" id="telemetry-colors">
+      <span class="telemetry-color-pill">PALE SAND7</span>
+      <span class="telemetry-color-pill">Soft Lavender</span>
+      <span class="telemetry-color-pill">#243D9B</span>
     </div>
   </aside>
 
-  <!-- ========================================================================
-       QUICK VIEW PRODUCT MODAL
-       ======================================================================== -->
-  <div class="modal-backdrop" id="quickViewBackdrop" aria-hidden="true"></div>
-  <div class="quick-view-modal" id="quickViewModal" role="dialog" aria-modal="true" aria-label="Product Details">
-    <button class="modal-close-btn" id="quickViewCloseBtn" aria-label="Close dialog">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-      </svg>
+  <!-- 4. Bottom Center Telemetry Pill -->
+  <div class="telemetry-bottom-center">
+    <button class="scroll-explore-pill interactive-element" id="scroll-explore-pill">
+      <div class="arrow-circle">⌃</div>
+      <span>SCROLL TO EXPLORE</span>
+      <div class="arrow-circle">↓</div>
     </button>
-    <div id="quickViewContent">
-      <!-- Injected dynamically by js/app.js -->
-    </div>
   </div>
 
-  <!-- ========================================================================
-       LIVE SEARCH MODAL
-       ======================================================================== -->
-  <div class="modal-backdrop" id="searchBackdrop" aria-hidden="true"></div>
-  <div class="search-modal" id="searchModal" role="dialog" aria-modal="true" aria-label="Search Products">
-    <div class="search-input-header">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-      </svg>
-      <input type="text" id="searchInput" class="search-input" placeholder="Search Mango, Chikku, Jackfruit, Banana..." autocomplete="off">
-      <button class="search-clear-btn" id="searchClearBtn" aria-label="Clear search">&times;</button>
-      <button class="header-icon-btn" id="searchCloseBtn" aria-label="Close search">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
-    </div>
-    <div class="search-results-body" id="searchResults">
-      <!-- Injected dynamically -->
-    </div>
-  </div>
+  <!-- 5. Bottom Right Floating Action Pill -->
+  <button class="floating-chat-pill interactive-element" id="quick-action-pill" aria-label="Quick Action">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  </button>
 
-  <!-- ========================================================================
-       MOBILE NAVIGATION DRAWER
-       ======================================================================== -->
-  <div class="drawer-backdrop" id="mobileNavBackdrop" aria-hidden="true"></div>
-  <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Mobile Navigation">
-    <div class="mobile-nav-header">
-      <div class="brand-logo-link">
-        <span class="brand-logo-mark">Realbeber</span>
-        <span class="brand-logo-sub">&amp; co.</span>
-        <span class="brand-logo-dot" aria-hidden="true"></span>
+  <!-- 6. Scroll Container & Choreographed Dimensional Worlds -->
+  <main id="scroll-container">
+
+    <!-- Section 1: The Portal Opening (0% - 20%) -->
+    <section class="editorial-section" id="section-portal" aria-label="Portal Opening">
+      <div class="sticky-viewport-panel">
+        <h1 class="portal-headline">
+          WELCOME TO THE<br>FRUIT DIMENSION
+        </h1>
+        <a href="#section-mango" class="portal-side-link interactive-element">VIEW MORE &gt;</a>
       </div>
-      <button class="cart-close-btn" id="mobileNavClose" aria-label="Close menu">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
-    </div>
-    <nav class="mobile-nav-links">
-      <a href="#fruitTransformationSection" class="mobile-nav-link" onclick="document.getElementById('mobileNavClose').click();">3D Experience</a>
-      <a href="#products" class="mobile-nav-link" onclick="document.getElementById('mobileNavClose').click();">All Products</a>
-      <a href="#fruitExplorerSection" class="mobile-nav-link" onclick="document.getElementById('mobileNavClose').click();">3D Fruit Explorer</a>
-      <a href="#science" class="mobile-nav-link" onclick="document.getElementById('mobileNavClose').click();">Freeze-Dry Science</a>
-      <a href="#crunchPlaygroundSection" class="mobile-nav-link" onclick="document.getElementById('mobileNavClose').click();">Fruit Playground</a>
-      <a href="#momentsSection" class="mobile-nav-link" onclick="document.getElementById('mobileNavClose').click();">Everyday Moments</a>
-      <a href="#faq" class="mobile-nav-link" onclick="document.getElementById('mobileNavClose').click();">FAQ &amp; Sourcing</a>
-    </nav>
-    <div class="mobile-nav-footer">
-      <button class="pill-btn pill-btn-black cart-trigger-btn" style="width: 100%;" onclick="document.getElementById('mobileNavClose').click();">
-        <span>View Bag (<span class="cart-count-badge">1</span>)</span>
-      </button>
-      <p style="font-size: 0.75rem; color: #777777; text-align: center;">From God's Own Country &bull; Kerala, India</p>
-    </div>
-  </aside>
+    </section>
 
-  <!-- ========================================================================
-       TOAST NOTIFICATIONS CONTAINER
-       ======================================================================== -->
-  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+    <!-- Section 2: The Mango World (20% - 45%) -->
+    <section class="editorial-section" id="section-mango" aria-label="The Mango World">
+      <div class="sticky-viewport-panel">
+        <div class="world-header-center">THE MANGO WORLD</div>
+        <div class="mango-content-block">
+          <span class="acid-pill-badge">#DDF05B</span>
+          <h2 class="oversized-block-title">
+            ONE FRUIT.<br>
+            A WHOLE<br>
+            NEW<br>
+            WORLD.
+          </h2>
+          <span class="cobalt-pill-badge">DEEP COBALT</span>
+        </div>
+      </div>
+    </section>
 
-  <!-- Application Scripts -->
-  <script type="module" src="js/app.js"></script>
+    <!-- Section 3: The Jackfruit World (45% - 65%) -->
+    <section class="editorial-section" id="section-jackfruit" aria-label="The Jackfruit World">
+      <div class="sticky-viewport-panel">
+        <div class="jackfruit-content-block">
+          <span class="dark-code-tag">#171719</span>
+          <h2 class="jackfruit-title">
+            THE<br>
+            JACKFRUIT<br>
+            WORLD
+          </h2>
+          <div class="jackfruit-swatches-row">
+            <span class="acid-pill-badge">#DDF05B</span>
+            <span class="hud-swatch-chip hud-swatch-lavender">#C7B8F0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: The Chikoo World (65% - 82%) -->
+    <section class="editorial-section" id="section-chikoo" aria-label="The Chikoo World">
+      <div class="sticky-viewport-panel">
+        <div class="chikoo-content-block">
+          <h2 class="chikoo-title">
+            THE<br>
+            CHIKOO<br>
+            WORLD
+          </h2>
+          <span class="tangerine-pill-badge">#FF6A2A</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: The Banana World (82% - 92%) -->
+    <section class="editorial-section" id="section-banana" aria-label="The Banana World">
+      <div class="sticky-viewport-panel">
+        <div class="banana-content-block">
+          <h2 class="banana-title">
+            THE<br>
+            BANANA<br>
+            WORLD
+          </h2>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: The Finale — Realbeber Taste The Future (92% - 100%) -->
+    <section class="editorial-section" id="section-finale" aria-label="Realbeber Collection Finale">
+      <div class="sticky-viewport-panel">
+        <div class="finale-content-block">
+          <h2 class="finale-headline">
+            <span class="highlight-tangerine">REALBEBER.</span><br>
+            TASTE THE FUTURE.
+          </h2>
+          <button class="glass-explore-btn interactive-element" id="explore-collection-btn">
+            EXPLORE THE COLLECTION
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 7. Collection Modal / Sliding Side Drawer -->
+  <div class="collection-drawer-overlay" id="collection-drawer-overlay" role="dialog" aria-modal="true" aria-label="Product Collection">
+    <div class="collection-drawer">
+      <div class="drawer-header">
+        <h2 class="drawer-title">REALBEBER COLLECTION</h2>
+        <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Close drawer">&times;</button>
+      </div>
+      <div class="drawer-products-grid" id="drawer-products-list">
+        <!-- Rendered dynamically by main-app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/webgl-experience.js"></script>
+  <script type="module" src="js/main-app.js"></script>
+
 </body>
 </html>
-
