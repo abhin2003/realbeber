@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>REALBEBER — Museum-Grade 3D Fruit Dimension</title>
-  <meta name="description" content="An interactive 3D digital art installation for REALBEBER, futuristic luxury freeze-dried fruit chips from Kerala. Real Fruit. Remarkable Crunch.">
+  <title>REALBEBER — Museum-Grade 4K 3D Fruit Dimension</title>
+  <meta name="description" content="An interactive 4K 3D digital art installation for REALBEBER, futuristic luxury freeze-dried fruit chips from Kerala. Real Fruit. Remarkable Crunch.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/logo_dark.png">
 
-  <!-- Google Fonts: Syne (Brutalist Display), Space Grotesk (Editorial Mono), Plus Jakarta Sans -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
@@ -19,201 +19,21 @@
 </head>
 <body>
 
-  <!-- 1. Master Fixed 3D WebGL Canvas -->
+  <!-- Master Fixed 4K 3D WebGL / Canvas Viewport -->
   <div id="webgl-canvas-container" aria-hidden="true"></div>
 
-  <!-- 2. Floating Minimal HUD Navigation -->
-  <header class="floating-hud-header" role="banner">
-    <div class="hud-left-group">
-      <button class="hud-hamburger-btn" id="menu-toggle" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <a href="#" class="hud-brand-logo">REALBEBER</a>
-      <nav class="hud-nav-links" aria-label="Primary">
-        <a href="#section-portal">HOME</a>
-        <a href="#section-mango">ADVANTAGES</a>
-        <a href="#section-finale">BUSINESS</a>
-        <a href="#section-finale">CONTACTS</a>
-      </nav>
-    </div>
-
-    <div class="hud-right-actions">
-      <!-- Color Swatches -->
-      <span class="hud-swatch-chip hud-swatch-tangerine">#FF6A2A</span>
-      <span class="hud-swatch-chip hud-swatch-lavender">Soft Lavender</span>
-      <span class="hud-swatch-chip hud-swatch-sand">Pale Sand</span>
-
-      <!-- Audio Engine Sound Wave Toggle -->
-      <button class="hud-icon-btn" id="audio-toggle" aria-label="Toggle dimensional ambient soundscape" title="Toggle Sound">
-        <div class="audio-equalizer">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-      </button>
-
-      <!-- Search Trigger -->
-      <button class="hud-icon-btn" id="search-btn" aria-label="Search collection">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="m21 21-4.3-4.3"/>
-        </svg>
-      </button>
-
-      <!-- Cart Trigger -->
-      <button class="hud-icon-btn" id="cart-btn" aria-label="View shopping bag">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
-          <path d="M3 6h18"/>
-          <path d="M16 10a4 4 0 0 1-8 0"/>
-        </svg>
-        <span class="cart-badge">0</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- 3. Left Telemetry HUD (Vertical Dimensional Scroll) -->
-  <aside class="telemetry-hud-left" aria-hidden="true">
-    <div class="telemetry-progress-track">
-      <span class="telemetry-arrow">↑</span>
-      <div class="telemetry-line">
-        <span class="telemetry-pip" id="telemetry-pip"></span>
-      </div>
-      <span class="telemetry-arrow">↓</span>
-    </div>
-    <div class="telemetry-labels" id="telemetry-colors">
-      <span class="telemetry-color-pill">PALE SAND7</span>
-      <span class="telemetry-color-pill">Soft Lavender</span>
-      <span class="telemetry-color-pill">#243D9B</span>
-    </div>
-  </aside>
-
-  <!-- 4. Bottom Center Telemetry Pill -->
-  <div class="telemetry-bottom-center">
-    <button class="scroll-explore-pill interactive-element" id="scroll-explore-pill">
-      <div class="arrow-circle">⌃</div>
-      <span>SCROLL TO EXPLORE</span>
-      <div class="arrow-circle">↓</div>
-    </button>
-  </div>
-
-  <!-- 5. Bottom Right Floating Action Pill -->
-  <button class="floating-chat-pill interactive-element" id="quick-action-pill" aria-label="Quick Action">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-  </button>
-
-  <!-- 6. Scroll Container & Choreographed Dimensional Worlds -->
+  <!-- Scroll Container for Seamless Dimensional Navigation (Zero Text / Pure Visuals) -->
   <main id="scroll-container">
-
-    <!-- Section 1: The Portal Opening (0% - 20%) -->
-    <section class="editorial-section" id="section-portal" aria-label="Portal Opening">
-      <div class="sticky-viewport-panel">
-        <h1 class="portal-headline">
-          WELCOME TO THE<br>FRUIT DIMENSION
-        </h1>
-        <a href="#section-mango" class="portal-side-link interactive-element">VIEW MORE &gt;</a>
-      </div>
-    </section>
-
-    <!-- Section 2: The Mango World (20% - 45%) -->
-    <section class="editorial-section" id="section-mango" aria-label="The Mango World">
-      <div class="sticky-viewport-panel">
-        <div class="world-header-center">THE MANGO WORLD</div>
-        <div class="mango-content-block">
-          <span class="acid-pill-badge">#DDF05B</span>
-          <h2 class="oversized-block-title">
-            ONE FRUIT.<br>
-            A WHOLE<br>
-            NEW<br>
-            WORLD.
-          </h2>
-          <span class="cobalt-pill-badge">DEEP COBALT</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 3: The Jackfruit World (45% - 65%) -->
-    <section class="editorial-section" id="section-jackfruit" aria-label="The Jackfruit World">
-      <div class="sticky-viewport-panel">
-        <div class="jackfruit-content-block">
-          <span class="dark-code-tag">#171719</span>
-          <h2 class="jackfruit-title">
-            THE<br>
-            JACKFRUIT<br>
-            WORLD
-          </h2>
-          <div class="jackfruit-swatches-row">
-            <span class="acid-pill-badge">#DDF05B</span>
-            <span class="hud-swatch-chip hud-swatch-lavender">#C7B8F0</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 4: The Chikoo World (65% - 82%) -->
-    <section class="editorial-section" id="section-chikoo" aria-label="The Chikoo World">
-      <div class="sticky-viewport-panel">
-        <div class="chikoo-content-block">
-          <h2 class="chikoo-title">
-            THE<br>
-            CHIKOO<br>
-            WORLD
-          </h2>
-          <span class="tangerine-pill-badge">#FF6A2A</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 5: The Banana World (82% - 92%) -->
-    <section class="editorial-section" id="section-banana" aria-label="The Banana World">
-      <div class="sticky-viewport-panel">
-        <div class="banana-content-block">
-          <h2 class="banana-title">
-            THE<br>
-            BANANA<br>
-            WORLD
-          </h2>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 6: The Finale — Realbeber Taste The Future (92% - 100%) -->
-    <section class="editorial-section" id="section-finale" aria-label="Realbeber Collection Finale">
-      <div class="sticky-viewport-panel">
-        <div class="finale-content-block">
-          <h2 class="finale-headline">
-            <span class="highlight-tangerine">REALBEBER.</span><br>
-            TASTE THE FUTURE.
-          </h2>
-          <button class="glass-explore-btn interactive-element" id="explore-collection-btn">
-            EXPLORE THE COLLECTION
-          </button>
-        </div>
-      </div>
-    </section>
-
+    <section class="editorial-section" id="section-portal" aria-label="Dimension 1: Portal Monolith"></section>
+    <section class="editorial-section" id="section-mango" aria-label="Dimension 2: The Mango World"></section>
+    <section class="editorial-section" id="section-jackfruit" aria-label="Dimension 3: The Jackfruit Biome"></section>
+    <section class="editorial-section" id="section-chikoo" aria-label="Dimension 4: The Chikoo World"></section>
+    <section class="editorial-section" id="section-banana" aria-label="Dimension 5: The Banana World"></section>
+    <section class="editorial-section" id="section-finale" aria-label="Dimension 6: The Collection Finale"></section>
   </main>
 
-  <!-- 7. Collection Modal / Sliding Side Drawer -->
-  <div class="collection-drawer-overlay" id="collection-drawer-overlay" role="dialog" aria-modal="true" aria-label="Product Collection">
-    <div class="collection-drawer">
-      <div class="drawer-header">
-        <h2 class="drawer-title">REALBEBER COLLECTION</h2>
-        <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Close drawer">&times;</button>
-      </div>
-      <div class="drawer-products-grid" id="drawer-products-list">
-        <!-- Rendered dynamically by main-app.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Scripts -->
+  <!-- Master 4K Interactive Experience Engine -->
   <script type="module" src="js/webgl-experience.js"></script>
-  <script type="module" src="js/main-app.js"></script>
 
 </body>
 </html>

@@ -1,30 +1,24 @@
 /**
- * Realbeber - Master WebGL 3D Experience Engine
+ * Realbeber & Co. - Master 4K Ultra-High Definition 3D Experience Engine
+ * - 4K UHD Master Assets (3840x2160, razor-sharp Lanczos-4 detail)
  * - Zero Cursor Tilt (rock-solid, locked canvas with no left/right wobble)
- * - Precision World Navigation (exact frame targeting for Portal, Mango, Jackfruit, Chikoo, Banana, Finale)
- * - 60/120 FPS Direct Frame Binding with Lenis Smooth Scroll
- * - Milestone Preloading & Background GPU Frame Decoding
+ * - Seamless Multi-World Cross-Fade Scrubber (Hermite smoothstep dissolve with depth camera push-in)
+ * - Zero Split Seams or Horizontal Line Cuts
+ * - Zero Text or Button Clutter (100% pure visual luxury museum experience)
+ * - 60/120 FPS Direct Lenis Smooth Scroll Binding with async GPU frame decoding
  */
 
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { audioEngine } from './audio-engine.js';
 
-gsap.registerPlugin(ScrollTrigger);
-
-const TOTAL_FRAMES = 240;
-const BASE_FRAME_URL = '/screen_sequence/frame_';
-
-// Exact calibrated scroll ratios corresponding to the center of each 3D world
-const WORLD_RATIOS = {
-  portal: 0.000,     // Frame 0: The Portal Monolith
-  mango: 0.314,      // Frame 75: The Mango World (curved architectural dunes & orbiting chips)
-  jackfruit: 0.502,  // Frame 120: The Jackfruit World (acid yellow & green archways)
-  chikoo: 0.648,     // Frame 155: The Chikoo World (warm clay arches & velvety chikoo)
-  banana: 0.774,     // Frame 185: The Banana World (clean architectural curves & slices)
-  finale: 1.000      // Frame 235: The Finale (4 standing Realbeber packs on podiums)
-};
+const WORLDS = [
+  { id: 'portal', src: '/worlds_4k/world_01_portal_4k.webp' },
+  { id: 'mango', src: '/worlds_4k/world_02_mango_4k.webp' },
+  { id: 'jackfruit', src: '/worlds_4k/world_03_jackfruit_4k.webp' },
+  { id: 'chikoo', src: '/worlds_4k/world_04_chikoo_4k.webp' },
+  { id: 'banana', src: '/worlds_4k/world_05_banana_4k.webp' },
+  { id: 'finale', src: '/worlds_4k/world_06_finale_4k.webp' }
+];
 
 class WebGLExperience {
   constructor() {
@@ -32,36 +26,32 @@ class WebGLExperience {
     if (!this.container) return;
 
     this.scrollProgress = 0;
-    this.targetFrame = 0;
-    this.lastRenderedIndex = -1;
-    this.scrollVelocity = 0;
+    this.renderedProgress = -1;
+    this.isRendering = false;
+    this.audioStarted = false;
 
-    // Frames storage & preloading
-    this.frames = new Array(TOTAL_FRAMES);
-    this.loadedFrames = new Set();
+    // Preload 4K World images
+    this.images = [];
+    this.loadedCount = 0;
 
     this.initCanvas();
     this.initLenis();
-    this.initDOMHotspots();
-    this.preloadMilestoneFrames();
+    this.load4KAssets();
     this.setupEvents();
-    this.setupScrollTriggers();
   }
 
   /* -------------------------------------------------------------
-     1. High-DPI Canvas Setup (Locked, Zero Cursor Tilt)
+     1. High-DPI Canvas Setup (Locked Solid, Zero Tilt)
   ------------------------------------------------------------- */
   initCanvas() {
     this.container.innerHTML = '';
     this.canvas = document.createElement('canvas');
-    this.canvas.id = 'scene-scrubber-canvas';
+    this.canvas.id = 'scene-4k-canvas';
 
     this.ctx = this.canvas.getContext('2d', {
       alpha: false,
       desynchronized: true
     });
-    this.ctx.imageSmoothingEnabled = true;
-    this.ctx.imageSmoothingQuality = 'high';
 
     // Completely lock canvas transform: ZERO tilt when moving cursor left/right
     this.canvas.style.position = 'fixed';
@@ -93,289 +83,201 @@ class WebGLExperience {
       this.ctx.imageSmoothingQuality = 'high';
     }
 
-    this.lastRenderedIndex = -1;
-    this.renderFrame(this.targetFrame);
+    this.renderedProgress = -1;
+    this.render();
   }
 
   /* -------------------------------------------------------------
-     2. Asynchronous Milestone Preloader
+     2. Preload 4K UHD Master Visuals
   ------------------------------------------------------------- */
-  preloadMilestoneFrames() {
-    const formatNumber = (num) => String(num).padStart(3, '0');
+  load4KAssets() {
+    WORLDS.forEach((world, index) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = world.src;
 
-    const loadFrame = (index) => {
-      if (this.frames[index]) return Promise.resolve(this.frames[index]);
-
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.src = `${BASE_FRAME_URL}${formatNumber(index)}.webp`;
-
-        if (img.decode) {
-          img.decode().then(() => {
-            this.frames[index] = img;
-            this.loadedFrames.add(index);
-            if (this.lastRenderedIndex === -1 && index === 0) {
-              this.renderFrame(0);
-            }
-            resolve(img);
-          }).catch(() => {
-            img.onload = () => {
-              this.frames[index] = img;
-              this.loadedFrames.add(index);
-              resolve(img);
-            };
-          });
-        } else {
-          img.onload = () => {
-            this.frames[index] = img;
-            this.loadedFrames.add(index);
-            resolve(img);
-          };
+      img.onload = async () => {
+        try {
+          if (img.decode) {
+            await img.decode();
+          }
+        } catch (_) {
+          // Fallback if already decoded
         }
-      });
-    };
+        this.loadedCount++;
+        this.renderedProgress = -1;
+        this.render();
+      };
 
-    // Phase 1: Frame 0 for instant initial render
-    loadFrame(0).then(() => {
-      // Phase 2: Key milestones for each world
-      const milestones = [0, 20, 45, 75, 95, 120, 140, 155, 175, 185, 210, 235, 239];
-      Promise.all(milestones.map(loadFrame)).then(() => {
-        // Phase 3: Buffer all remaining frames progressively
-        let nextIdx = 1;
-        const loadBatch = () => {
-          const batch = [];
-          for (let k = 0; k < 12 && nextIdx < TOTAL_FRAMES; k++) {
-            if (!this.loadedFrames.has(nextIdx)) {
-              batch.push(loadFrame(nextIdx));
-            }
-            nextIdx++;
-          }
-
-          if (batch.length > 0) {
-            Promise.all(batch).then(() => {
-              if (nextIdx < TOTAL_FRAMES) {
-                if (window.requestIdleCallback) {
-                  window.requestIdleCallback(loadBatch, { timeout: 120 });
-                } else {
-                  setTimeout(loadBatch, 16);
-                }
-              }
-            });
-          }
-        };
-
-        loadBatch();
-      });
+      this.images[index] = img;
     });
   }
 
   /* -------------------------------------------------------------
-     3. Lenis Smooth Scroll with Direct Frame Scrubbing (Zero Lag)
+     3. Smooth Lenis Momentum Scroll Binding (60/120 FPS)
   ------------------------------------------------------------- */
   initLenis() {
     this.lenis = new Lenis({
-      duration: 1.15,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
+      gestureOrientation: 'vertical',
       smoothWheel: true,
+      smoothTouch: true,
+      touchMultiplier: 1.5,
       wheelMultiplier: 1.0,
-      touchMultiplier: 1.5
+      autoResize: true
     });
 
-    this.lenis.on('scroll', (e) => {
-      ScrollTrigger.update();
-      this.scrollVelocity = e.velocity || 0;
-      audioEngine.modulateVelocity(this.scrollVelocity);
+    this.lenis.on('scroll', ({ progress }) => {
+      this.scrollProgress = Math.max(0, Math.min(1, progress || 0));
+      this.requestRender();
 
-      if (e.limit > 0) {
-        this.scrollProgress = Math.min(1.0, Math.max(0.0, e.scroll / e.limit));
-        this.targetFrame = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.round(this.scrollProgress * (TOTAL_FRAMES - 1))));
-        this.renderFrame(this.targetFrame);
+      // Start dimensional audio on first user scroll
+      if (!this.audioStarted && audioEngine) {
+        try {
+          audioEngine.init();
+          if (audioEngine.isMuted) audioEngine.toggle();
+        } catch (_) {}
+        this.audioStarted = true;
       }
     });
 
-    gsap.ticker.add((time) => {
-      this.lenis.raf(time * 1000);
-    });
-    gsap.ticker.lagSmoothing(0);
+    const raf = (time) => {
+      this.lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+  }
+
+  requestRender() {
+    if (!this.isRendering) {
+      this.isRendering = true;
+      requestAnimationFrame(() => {
+        this.render();
+        this.isRendering = false;
+      });
+    }
   }
 
   /* -------------------------------------------------------------
-     4. Navigation to Specific World (Smooth Page Transitions)
+     4. Seamless Cinematic Multi-World Dissolve & Scale
   ------------------------------------------------------------- */
-  navigateToWorld(worldName, duration = 1.3) {
-    const ratio = WORLD_RATIOS[worldName] !== undefined ? WORLD_RATIOS[worldName] : 0;
-    const limit = this.lenis.limit || (document.documentElement.scrollHeight - window.innerHeight);
-    const targetScrollY = limit * ratio;
+  render() {
+    if (!this.ctx || !this.images.length) return;
 
-    audioEngine.playClick();
-    this.lenis.scrollTo(targetScrollY, { duration });
-  }
+    const progress = Math.max(0, Math.min(1, this.scrollProgress));
+    const totalTransitions = WORLDS.length - 1; // 5 transitions across 6 worlds
+    const scaled = progress * totalTransitions; // 0.0 to 5.0
 
-  getCurrentWorldIndex() {
-    const p = this.scrollProgress;
-    if (p < 0.20) return 0; // Portal
-    if (p < 0.42) return 1; // Mango
-    if (p < 0.58) return 2; // Jackfruit
-    if (p < 0.72) return 3; // Chikoo
-    if (p < 0.88) return 4; // Banana
-    return 5; // Finale
-  }
+    const currIndex = Math.min(Math.floor(scaled), totalTransitions - 1);
+    const nextIndex = currIndex + 1;
+    const u = scaled - currIndex; // local fraction in interval [0.0, 1.0]
 
-  navigateStep(direction) {
-    const worlds = ['portal', 'mango', 'jackfruit', 'chikoo', 'banana', 'finale'];
-    const currentIdx = this.getCurrentWorldIndex();
-    const nextIdx = Math.min(worlds.length - 1, Math.max(0, currentIdx + direction));
-    this.navigateToWorld(worlds[nextIdx], 1.2);
-  }
+    // Velvet-smooth Hermite cross-dissolve & camera zoom interpolation
+    // u in [0.0, 0.35]: dwell in World currIndex with gentle camera dolly
+    // u in [0.35, 0.85]: seamless cross-dissolve into World nextIndex
+    // u in [0.85, 1.00]: locked into World nextIndex
+    let alphaNext = 0;
+    let scaleCurr = 1.0;
+    let scaleNext = 1.0;
 
-  /* -------------------------------------------------------------
-     5. ScrollTrigger Telemetry
-  ------------------------------------------------------------- */
-  setupScrollTriggers() {
-    ScrollTrigger.create({
-      trigger: '#scroll-container',
-      start: 'top top',
-      end: 'bottom bottom',
-      onUpdate: (self) => {
-        this.updateTelemetry(self.progress);
-      }
-    });
-  }
-
-  updateTelemetry(progress) {
-    if (progress > 0.88) {
-      document.body.classList.add('theme-dark');
+    if (u <= 0.35) {
+      alphaNext = 0;
+      scaleCurr = 1.0 + (u / 0.35) * 0.025;
+    } else if (u < 0.85) {
+      const t = (u - 0.35) / 0.50; // 0.0 to 1.0
+      // Hermite smoothstep curve: t * t * (3 - 2 * t)
+      const s = t * t * (3 - 2 * t);
+      alphaNext = s;
+      scaleCurr = 1.025 + s * 0.045; // camera glides forward through world
+      scaleNext = 1.045 - s * 0.045; // next world converges seamlessly from depth
     } else {
-      document.body.classList.remove('theme-dark');
+      alphaNext = 1;
+      scaleNext = 1.0 + ((u - 0.85) / 0.15) * 0.015;
     }
 
-    const pip = document.getElementById('telemetry-pip');
-    if (pip) {
-      pip.style.top = `${Math.min(100, Math.max(0, progress * 100))}%`;
+    const imgCurr = this.images[currIndex];
+    const imgNext = this.images[nextIndex];
+
+    // Clear frame
+    this.ctx.globalAlpha = 1.0;
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 1. Draw current world if visible
+    if (alphaNext < 1 && imgCurr && imgCurr.complete && imgCurr.naturalWidth > 0) {
+      this.drawImageCover(imgCurr, 1.0 - alphaNext, scaleCurr);
     }
 
-    const exploreBtn = document.getElementById('explore-collection-btn');
-    if (exploreBtn) {
-      if (progress > 0.88) {
-        exploreBtn.style.opacity = '1';
-        exploreBtn.style.pointerEvents = 'auto';
-      } else {
-        exploreBtn.style.opacity = '0';
-        exploreBtn.style.pointerEvents = 'none';
-      }
+    // 2. Cross-dissolve next world seamlessly on top
+    if (alphaNext > 0 && imgNext && imgNext.complete && imgNext.naturalWidth > 0) {
+      this.drawImageCover(imgNext, alphaNext, scaleNext);
     }
+
+    this.renderedProgress = progress;
   }
 
   /* -------------------------------------------------------------
-     6. High-Clarity Canvas Frame Render (Dirty-Flag Optimized)
+     5. High-Fidelity Aspect-Ratio Preserving Cover Draw
   ------------------------------------------------------------- */
-  renderFrame(frameIndex) {
-    if (frameIndex === this.lastRenderedIndex) return;
-
-    let img = this.frames[frameIndex];
-
-    if (!img || !img.complete) {
-      let nearest = null;
-      let minDiff = Infinity;
-      for (const loadedIdx of this.loadedFrames) {
-        const diff = Math.abs(loadedIdx - frameIndex);
-        if (diff < minDiff) {
-          minDiff = diff;
-          nearest = this.frames[loadedIdx];
-        }
-      }
-      img = nearest;
-    }
-
-    if (!img || !img.complete) return;
-
+  drawImageCover(img, alpha = 1.0, scale = 1.0) {
     const cw = this.canvas.width;
     const ch = this.canvas.height;
-    const iw = img.naturalWidth || img.width;
-    const ih = img.naturalHeight || img.height;
-    if (!iw || !ih) return;
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
 
-    const scale = Math.max(cw / iw, ch / ih);
-    const dw = iw * scale;
-    const dh = ih * scale;
-    const dx = (cw - dw) * 0.5;
-    const dy = (ch - dh) * 0.5;
+    const canvasRatio = cw / ch;
+    const imgRatio = iw / ih;
 
-    this.ctx.drawImage(img, dx, dy, dw, dh);
-    this.lastRenderedIndex = frameIndex;
+    let renderW, renderH;
+    if (canvasRatio > imgRatio) {
+      renderW = cw * scale;
+      renderH = (cw / imgRatio) * scale;
+    } else {
+      renderH = ch * scale;
+      renderW = (ch * imgRatio) * scale;
+    }
+
+    const offsetX = (cw - renderW) / 2;
+    const offsetY = (ch - renderH) / 2;
+
+    this.ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+    this.ctx.drawImage(img, offsetX, offsetY, renderW, renderH);
   }
 
   /* -------------------------------------------------------------
-     7. Setup Events & Hotspots
+     6. Window Resizing & Interaction Events
   ------------------------------------------------------------- */
   setupEvents() {
-    window.addEventListener('resize', () => {
-      this.onResize();
-      ScrollTrigger.refresh();
-    });
-  }
+    window.addEventListener('resize', () => this.onResize(), { passive: true });
 
-  initDOMHotspots() {
-    // Navigation Links
-    document.querySelectorAll('a[href^="#"]').forEach((a) => {
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const href = a.getAttribute('href');
-        if (href === '#section-portal' || href === '#') {
-          this.navigateToWorld('portal');
-        } else if (href === '#section-mango') {
-          this.navigateToWorld('mango');
-        } else if (href === '#section-jackfruit') {
-          this.navigateToWorld('jackfruit');
-        } else if (href === '#section-chikoo') {
-          this.navigateToWorld('chikoo');
-        } else if (href === '#section-banana') {
-          this.navigateToWorld('banana');
-        } else if (href === '#section-finale') {
-          this.navigateToWorld('finale');
-        }
-      });
-    });
+    // Audio resume on first user interaction anywhere
+    const resumeAudio = () => {
+      if (!this.audioStarted && audioEngine) {
+        try {
+          audioEngine.init();
+          if (audioEngine.isMuted) audioEngine.toggle();
+        } catch (_) {}
+        this.audioStarted = true;
+      }
+      window.removeEventListener('pointerdown', resumeAudio);
+      window.removeEventListener('keydown', resumeAudio);
+      window.removeEventListener('wheel', resumeAudio);
+    };
 
-    // Brand Logo
-    const brandLogo = document.querySelector('.hud-brand-logo');
-    if (brandLogo) {
-      brandLogo.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.navigateToWorld('portal');
-      });
-    }
-
-    // Scroll explore pill
-    const explorePill = document.getElementById('scroll-explore-pill');
-    if (explorePill) {
-      explorePill.addEventListener('click', () => {
-        this.navigateToWorld('mango');
-      });
-    }
-
-    // Telemetry Arrows: Smooth step to next / previous world
-    const arrowUp = document.querySelector('.telemetry-arrow:first-child');
-    const arrowDown = document.querySelector('.telemetry-arrow:last-child');
-    if (arrowUp) {
-      arrowUp.style.cursor = 'pointer';
-      arrowUp.addEventListener('click', () => {
-        this.navigateStep(-1);
-      });
-    }
-    if (arrowDown) {
-      arrowDown.style.cursor = 'pointer';
-      arrowDown.addEventListener('click', () => {
-        this.navigateStep(1);
-      });
-    }
+    window.addEventListener('pointerdown', resumeAudio, { passive: true });
+    window.addEventListener('keydown', resumeAudio, { passive: true });
+    window.addEventListener('wheel', resumeAudio, { passive: true });
   }
 }
 
 // Instantiate master experience once DOM is ready
-window.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    window.webglExperience = new WebGLExperience();
+  });
+} else {
   window.webglExperience = new WebGLExperience();
-});
+}
 
-export { WebGLExperience };
+export default WebGLExperience;
