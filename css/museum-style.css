@@ -847,3 +847,302 @@ body {
     font-size: 2.8rem;
   }
 }
+
+/* -------------------------------------------------------------------------
+   EXACT VIDEO SYNCHRONIZATION OVERRIDES
+   The 3D canvas renders the complete video frames with 100% fidelity.
+   DOM text overlays are hidden to prevent doubling while preserving SEO & hitboxes.
+------------------------------------------------------------------------- */
+.portal-headline,
+.world-header-center,
+.oversized-block-title,
+.jackfruit-title,
+.jackfruit-content-block,
+.chikoo-title,
+.chikoo-content-block,
+.banana-title,
+.banana-content-block,
+.finale-headline,
+.acid-pill-badge,
+.cobalt-pill-badge,
+.dark-code-tag,
+.tangerine-pill-badge,
+.jackfruit-swatches-row {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Hide duplicate left telemetry bar text so canvas telemetry shows cleanly */
+.telemetry-hud-left {
+  opacity: 0 !important;
+  pointer-events: auto;
+}
+
+/* Transparent interactive hotspot for bottom explore pill */
+.telemetry-bottom-center {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+
+.scroll-explore-pill {
+  background: transparent !important;
+  border: none !important;
+  color: transparent !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  width: 220px !important;
+  height: 64px !important;
+}
+
+.scroll-explore-pill * {
+  opacity: 0 !important;
+}
+
+/* Transparent interactive hotspot for bottom right chat bubble */
+.floating-chat-pill {
+  position: fixed;
+  bottom: 20px;
+  right: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  cursor: pointer !important;
+  z-index: 50;
+}
+
+.floating-chat-pill svg {
+  opacity: 0 !important;
+}
+
+/* Transparent interactive hotspot for VIEW MORE > */
+.portal-side-link {
+  position: absolute;
+  right: 6vw;
+  top: 50%;
+  width: 130px;
+  height: 40px;
+  color: transparent !important;
+  border-bottom: none !important;
+  cursor: pointer !important;
+}
+
+/* Interactive hotspot for EXPLORE THE COLLECTION in finale */
+.glass-explore-btn {
+  position: fixed !important;
+  bottom: 34px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 320px !important;
+  height: 54px !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  border: 1.5px solid transparent !important;
+  color: transparent !important;
+  cursor: pointer !important;
+  z-index: 60 !important;
+  transition: all 0.25s ease !important;
+}
+
+.glass-explore-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Top HUD Header: Keep interactive elements transparent over the canvas header */
+.floating-hud-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  padding: 16px 36px;
+  z-index: 50;
+  background: transparent;
+  pointer-events: none;
+}
+
+.hud-left-group, .hud-right-actions {
+  pointer-events: auto;
+}
+
+.hud-hamburger-btn {
+  opacity: 0;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+}
+
+.hud-brand-logo {
+  color: transparent !important;
+  cursor: pointer;
+  width: 160px;
+  height: 36px;
+  display: inline-block;
+}
+
+.hud-nav-links a {
+  color: transparent !important;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.hud-swatch-chip {
+  opacity: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.hud-icon-btn {
+  background: transparent !important;
+  border: none !important;
+  color: transparent !important;
+  cursor: pointer;
+}
+
+.hud-icon-btn svg {
+  opacity: 0;
+}
+
+.hud-icon-btn .cart-badge {
+  opacity: 0;
+}
+
+/* Dedicated Floating Audio Equalizer Control (Minimal & Elegant) */
+#audio-toggle {
+  position: fixed;
+  top: 22px;
+  right: 120px;
+  z-index: 70;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(23, 23, 25, 0.75) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.25s ease;
+}
+
+#audio-toggle:hover {
+  background: rgba(23, 23, 25, 0.95) !important;
+  transform: scale(1.1);
+}
+
+#audio-toggle .audio-equalizer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 14px;
+}
+
+#audio-toggle .audio-equalizer span {
+  display: block;
+  width: 2.5px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: height 0.2s ease;
+}
+
+#audio-toggle.audio-active .audio-equalizer span:nth-child(1) {
+  animation: eqBounce 0.6s ease-in-out infinite alternate;
+}
+#audio-toggle.audio-active .audio-equalizer span:nth-child(2) {
+  animation: eqBounce 0.8s ease-in-out infinite alternate 0.2s;
+}
+#audio-toggle.audio-active .audio-equalizer span:nth-child(3) {
+  animation: eqBounce 0.5s ease-in-out infinite alternate 0.4s;
+}
+
+@keyframes eqBounce {
+  0% { height: 4px; }
+  100% { height: 16px; }
+}
+
+/* Interactive Hitbox for Cart button right over the shopping bag icon */
+#cart-btn {
+  position: fixed;
+  top: 18px;
+  right: 28px;
+  width: 48px;
+  height: 48px;
+  z-index: 70;
+  background: transparent !important;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+
+/* -------------------------------------------------------------------------
+   CLEAN PIXEL-PERFECT REFINEMENTS (ZERO BLUR SMUDGE, ZERO OVERLAP)
+------------------------------------------------------------------------- */
+.glass-explore-btn {
+  position: fixed !important;
+  bottom: 28px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 280px !important;
+  height: 50px !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  color: transparent !important;
+  cursor: pointer !important;
+  z-index: 60 !important;
+  transition: all 0.25s ease !important;
+}
+
+.glass-explore-btn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2) !important;
+}
+
+.scroll-explore-pill {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Audio Toggle: Placed elegantly in bottom-left corner with zero top HUD overlap */
+#audio-toggle {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 24px !important;
+  left: 28px !important;
+  right: auto !important;
+  z-index: 70 !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: rgba(23, 23, 25, 0.65) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#audio-toggle:hover {
+  background: rgba(23, 23, 25, 0.9) !important;
+  transform: scale(1.1) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}

@@ -1,68 +1,190 @@
 /**
- * Realbeber - Master WebGL 3D Experience
- * Museum-grade multi-dimensional Three.js world choreography with GSAP ScrollTrigger & Lenis.
+ * Realbeber - Master WebGL 3D Experience Engine
+ * Exact 1:1 Reference Video Synchronization with 60 FPS Canvas Frame Scrubbing,
+ * Dynamic 3D Perspective Tilt, Floating Fruit Particle Dust, Lenis Smooth Scroll,
+ * and Interactive HUD / Hotspot Choreography.
  */
 
-import * as THREE from 'three';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import {
-  createMangoGroup,
-  createJackfruitGroup,
-  createChikooGroup,
-  createBananaGroup,
-  createOrbitingDebris,
-  createPortalMonolith,
-  createPouchesGroup
-} from './fruit-models.js';
 import { audioEngine } from './audio-engine.js';
 
-// World Background Textures
-import texPortal from '../assets/worlds/world_01_portal.jpg';
-import texPortalOpen from '../assets/worlds/world_01_portal_open.jpg';
-import texMango from '../assets/worlds/world_02_mango.jpg';
-import texJackfruit from '../assets/worlds/world_03_jackfruit.jpg';
-import texChikoo from '../assets/worlds/world_04_chikoo.jpg';
-import texBanana from '../assets/worlds/world_05_banana.jpg';
-import texFinale from '../assets/worlds/world_06_finale.jpg';
-
-// Pouch Textures
-import mangoPouch from '../assets/products/mango_clean_pouch.png';
-import chikkuPouch from '../assets/products/chikku_clean_pouch.png';
-import jackfruitPouch from '../assets/products/jackfruit_clean_pouch.png';
-import bananaPouch from '../assets/products/banana_clean_pouch.png';
-
 gsap.registerPlugin(ScrollTrigger);
+
+const TOTAL_FRAMES = 240;
+const BASE_FRAME_URL = '/screen_sequence/frame_';
 
 class WebGLExperience {
   constructor() {
     this.container = document.getElementById('webgl-canvas-container');
     if (!this.container) return;
 
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
     this.scrollProgress = 0;
+    this.targetScrollProgress = 0;
     this.scrollVelocity = 0;
+    this.currentFrameIndex = 0;
+    this.targetFrameIndex = 0;
 
-    // Mouse Tracking & Parallax
-    this.mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    // Mouse Tracking for 3D Perspective Tilt
+    this.mouse = {
+      x: 0,
+      y: 0,
+      targetX: 0,
+      targetY: 0
+    };
+
+    // Drag tracking for 360 inspection nudge
     this.isDragging = false;
-    this.dragStart = { x: 0, y: 0 };
-    this.dragRotation = { x: 0, y: 0 };
+    this.dragStartX = 0;
+    this.dragProgressOffset = 0;
 
+    // Frames storage & preloading
+    this.frames = new Array(TOTAL_FRAMES);
+    this.loadedCount = 0;
+    this.nearestLoaded = null;
+
+    this.initCanvas();
     this.initLenis();
-    this.initThree();
-    this.loadTextures();
-    this.buildScene();
-    this.setupPostProcessing();
+    this.initDOMHotspots();
+    this.initDustParticles();
+    this.preloadFrames();
     this.setupEvents();
     this.setupScrollTriggers();
 
-    this.clock = new THREE.Clock();
-    this.animate();
+    // Start 60 FPS animation loop
+    this.animate = this.animate.bind(this);
+    requestAnimationFrame(this.animate);
   }
 
+  /* -------------------------------------------------------------
+     1. High-DPI Canvas Setup
+  ------------------------------------------------------------- */
+  initCanvas() {
+    this.container.innerHTML = '';
+    this.canvas = document.createElement('canvas');
+    this.canvas.id = 'scene-scrubber-canvas';
+    this.ctx = this.canvas.getContext('2d', {
+      alpha: false,
+      desynchronized: true
+    });
+
+    // Particle overlay canvas for floating crystalline dust
+    this.particleCanvas = document.createElement('canvas');
+    this.particleCanvas.id = 'particle-overlay-canvas';
+    this.particleCtx = this.particleCanvas.getContext('2d');
+    this.particleCanvas.style.position = 'absolute';
+    this.particleCanvas.style.top = '0';
+    this.particleCanvas.style.left = '0';
+    this.particleCanvas.style.width = '100%';
+    this.particleCanvas.style.height = '100%';
+    this.particleCanvas.style.pointerEvents = 'none';
+    this.particleCanvas.style.zIndex = '2';
+
+    this.container.style.perspective = '1200px';
+    this.container.style.transformStyle = 'preserve-3d';
+    this.canvas.style.transformOrigin = 'center center';
+    this.canvas.style.willChange = 'transform';
+    this.canvas.style.transition = 'transform 0.08s ease-out';
+
+    this.container.appendChild(this.canvas);
+    this.container.appendChild(this.particleCanvas);
+
+    this.onResize();
+  }
+
+  onResize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    this.canvas.width = Math.round(this.width * dpr);
+    this.canvas.height = Math.round(this.height * dpr);
+
+    this.particleCanvas.width = Math.round(this.width * dpr);
+    this.particleCanvas.height = Math.round(this.height * dpr);
+
+    // Re-draw current frame after resize
+    if (this.frames[this.currentFrameIndex] && this.frames[this.currentFrameIndex].complete) {
+      this.drawFrame(this.frames[this.currentFrameIndex]);
+    } else if (this.nearestLoaded) {
+      this.drawFrame(this.nearestLoaded);
+    }
+  }
+
+  /* -------------------------------------------------------------
+     2. Progressive Frame Preloader (Zero Flash, Instant Paint)
+  ------------------------------------------------------------- */
+  preloadFrames() {
+    const formatNumber = (num) => String(num).padStart(3, '0');
+
+    // Milestones to load with top priority for immediate responsive scrolling
+    const priorityMilestones = [
+      0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 239
+    ];
+
+    const loadSingleFrame = (i) => {
+      if (this.frames[i]) return Promise.resolve(this.frames[i]);
+
+      return new Promise((resolve) => {
+        const img = new Image();
+        const numStr = formatNumber(i);
+
+        img.onload = () => {
+          this.frames[i] = img;
+          this.loadedCount++;
+          if (!this.nearestLoaded || i === 0) {
+            this.nearestLoaded = img;
+            this.drawFrame(img);
+          }
+          resolve(img);
+        };
+
+        img.onerror = () => {
+          // Fallback to jpg if webp fails
+          img.src = `${BASE_FRAME_URL}${numStr}.jpg`;
+        };
+
+        // Primary source: optimized WebP
+        img.src = `${BASE_FRAME_URL}${numStr}.webp`;
+      });
+    };
+
+    // 1. Immediately load frame 0 for instant initial paint
+    loadSingleFrame(0).then(() => {
+      // 2. Load key milestones next
+      Promise.all(priorityMilestones.map((idx) => loadSingleFrame(idx))).then(() => {
+        // 3. Load remaining frames sequentially in chunks
+        let currentLoadIdx = 0;
+        const loadNextBatch = () => {
+          const batchSize = 12;
+          const batch = [];
+          for (let j = 0; j < batchSize && currentLoadIdx < TOTAL_FRAMES; j++) {
+            if (!this.frames[currentLoadIdx]) {
+              batch.push(loadSingleFrame(currentLoadIdx));
+            }
+            currentLoadIdx++;
+          }
+          if (batch.length > 0) {
+            Promise.all(batch).then(() => {
+              if (currentLoadIdx < TOTAL_FRAMES) {
+                if (window.requestIdleCallback) {
+                  window.requestIdleCallback(loadNextBatch, { timeout: 150 });
+                } else {
+                  setTimeout(loadNextBatch, 16);
+                }
+              }
+            });
+          }
+        };
+        loadNextBatch();
+      });
+    });
+  }
+
+  /* -------------------------------------------------------------
+     3. Smooth Lenis Inertia Scroll & GSAP Integration
+  ------------------------------------------------------------- */
   initLenis() {
     this.lenis = new Lenis({
       duration: 1.25,
@@ -104,552 +226,316 @@ class WebGLExperience {
     });
   }
 
-  initThree() {
-    // Renderer
-    this.renderer = new THREE.WebGLRenderer({
-      powerPreference: 'high-performance',
-      antialias: true,
-      alpha: true,
-      stencil: false,
-      depth: true
+  /* -------------------------------------------------------------
+     4. ScrollTrigger Timeline Across Dimensional Worlds
+  ------------------------------------------------------------- */
+  setupScrollTriggers() {
+    // Master ScrollTrigger tracking overall page progress (0.0 to 1.0)
+    ScrollTrigger.create({
+      trigger: '#scroll-container',
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: true,
+      onUpdate: (self) => {
+        this.targetScrollProgress = self.progress;
+        this.updateTelemetry(self.progress);
+      }
     });
-    this.renderer.setSize(this.width, this.height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.12;
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    this.container.appendChild(this.renderer.domElement);
+    // Navigation sections smooth anchors
+    const sectionConfigs = [
+      { id: '#section-portal', frame: 0, color: '#F3E9D7', name: 'PORTAL' },
+      { id: '#section-mango', frame: 60, color: '#FF6A2A', name: 'MANGO' },
+      { id: '#section-jackfruit', frame: 120, color: '#DDF05B', name: 'JACKFRUIT' },
+      { id: '#section-chikoo', frame: 155, color: '#C7B8F0', name: 'CHIKOO' },
+      { id: '#section-banana', frame: 185, color: '#F3E9D7', name: 'BANANA' },
+      { id: '#section-finale', frame: 230, color: '#171719', name: 'FINALE' }
+    ];
 
-    // Scene & Camera
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xf3e9d7); // Default Pale Sand
-
-    this.camera = new THREE.PerspectiveCamera(40, this.width / this.height, 0.1, 100);
-    this.camera.position.set(0, 0.2, 9.8);
-
-    // High-Contrast Studio Lighting
-    this.ambientLight = new THREE.AmbientLight(0xfbf8f2, 1.25);
-    this.scene.add(this.ambientLight);
-
-    this.keyLight = new THREE.DirectionalLight(0xfff6ea, 2.6);
-    this.keyLight.position.set(4, 7, 6);
-    this.keyLight.castShadow = true;
-    this.keyLight.shadow.mapSize.width = 2048;
-    this.keyLight.shadow.mapSize.height = 2048;
-    this.keyLight.shadow.camera.near = 0.5;
-    this.keyLight.shadow.camera.far = 25;
-    this.keyLight.shadow.bias = -0.0005;
-    this.scene.add(this.keyLight);
-
-    // Electric Tangerine Rim Light (#FF6A2A)
-    this.rimLight1 = new THREE.DirectionalLight(0xff6a2a, 3.2);
-    this.rimLight1.position.set(-5, 3.5, -4);
-    this.scene.add(this.rimLight1);
-
-    // Soft Lavender Fill Light (#C7B8F0)
-    this.rimLight2 = new THREE.DirectionalLight(0xc7b8f0, 1.8);
-    this.rimLight2.position.set(5, -3, -3);
-    this.scene.add(this.rimLight2);
-
-    // Acid Yellow Accent Light (#DDF05B)
-    this.accentLight = new THREE.PointLight(0xddf05b, 0, 15);
-    this.accentLight.position.set(0, 2, 2);
-    this.scene.add(this.accentLight);
-  }
-
-  loadTextures() {
-    const loader = new THREE.TextureLoader();
-    this.textures = {
-      portal: loader.load(texPortal),
-      portalOpen: loader.load(texPortalOpen),
-      mango: loader.load(texMango),
-      jackfruit: loader.load(texJackfruit),
-      chikoo: loader.load(texChikoo),
-      banana: loader.load(texBanana),
-      finale: loader.load(texFinale),
-      pouchMango: loader.load(mangoPouch),
-      pouchChikku: loader.load(chikkuPouch),
-      pouchJackfruit: loader.load(jackfruitPouch),
-      pouchBanana: loader.load(bananaPouch)
-    };
-
-    Object.values(this.textures).forEach((tex) => {
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.minFilter = THREE.LinearFilter;
-      tex.magFilter = THREE.LinearFilter;
+    sectionConfigs.forEach((cfg) => {
+      ScrollTrigger.create({
+        trigger: cfg.id,
+        start: 'top 80%',
+        end: 'bottom 20%',
+        onEnter: () => this.highlightSection(cfg),
+        onEnterBack: () => this.highlightSection(cfg)
+      });
     });
   }
 
-  buildScene() {
-    // 1. Dynamic Environment Backdrop Plane with Multi-Texture Cross-Fade Shader
-    const planeGeo = new THREE.PlaneGeometry(18, 10.2);
-    this.backdropMat = new THREE.ShaderMaterial({
-      uniforms: {
-        t0: { value: this.textures.portal },
-        t1: { value: this.textures.portalOpen },
-        t2: { value: this.textures.mango },
-        t3: { value: this.textures.jackfruit },
-        t4: { value: this.textures.chikoo },
-        t5: { value: this.textures.banana },
-        t6: { value: this.textures.finale },
-        progress: { value: 0.0 },
-        vignetteStrength: { value: 0.15 }
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D t0, t1, t2, t3, t4, t5, t6;
-        uniform float progress;
-        uniform float vignetteStrength;
-        varying vec2 vUv;
+  updateTelemetry(progress) {
+    this.scrollProgress = progress;
 
-        vec4 getBlendedScene(float p, vec2 uv) {
-          if (p < 0.16) {
-            float f = smoothstep(0.02, 0.12, p);
-            return mix(texture2D(t0, uv), texture2D(t1, uv), f);
-          } else if (p < 0.33) {
-            float f = smoothstep(0.14, 0.20, p);
-            return mix(texture2D(t1, uv), texture2D(t2, uv), f);
-          } else if (p < 0.50) {
-            float f = smoothstep(0.30, 0.36, p);
-            return mix(texture2D(t2, uv), texture2D(t3, uv), f);
-          } else if (p < 0.67) {
-            float f = smoothstep(0.47, 0.53, p);
-            return mix(texture2D(t3, uv), texture2D(t4, uv), f);
-          } else if (p < 0.83) {
-            float f = smoothstep(0.64, 0.70, p);
-            return mix(texture2D(t4, uv), texture2D(t5, uv), f);
-          } else {
-            float f = smoothstep(0.80, 0.86, p);
-            return mix(texture2D(t5, uv), texture2D(t6, uv), f);
-          }
-        }
+    // Telemetry progress pip indicator
+    const pip = document.getElementById('telemetry-pip');
+    if (pip) {
+      pip.style.top = `${Math.min(100, Math.max(0, progress * 100))}%`;
+    }
 
-        void main() {
-          vec4 col = getBlendedScene(progress, vUv);
-          vec2 center = vUv - vec2(0.5);
-          float dist = length(center);
-          col.rgb *= (1.0 - dist * vignetteStrength);
-          gl_FragColor = col;
-        }
-      `,
-      depthWrite: false,
-      depthTest: true
-    });
+    // World indicator highlights
+    const colorSwatches = document.getElementById('telemetry-colors');
+    if (colorSwatches) {
+      const pills = colorSwatches.querySelectorAll('.telemetry-color-pill');
+      pills.forEach((pill, idx) => {
+        const activeIdx = Math.floor(progress * 3);
+        pill.classList.toggle('active', idx === activeIdx);
+      });
+    }
 
-    this.backdropPlane = new THREE.Mesh(planeGeo, this.backdropMat);
-    this.backdropPlane.position.set(0, 0, -2.8);
-    this.scene.add(this.backdropPlane);
-
-    // 2. Sculptural Monolith Gateway (Portal Scene)
-    this.portalMonolith = createPortalMonolith();
-    this.portalMonolith.group.position.set(0, 0.25, 0);
-    this.portalMonolith.group.scale.setScalar(0.82);
-    this.scene.add(this.portalMonolith.group);
-
-    // 3. Hero Fruits
-    this.fruitMango = createMangoGroup();
-    this.fruitMango.position.set(0, 0.35, 0.5);
-    this.fruitMango.rotation.set(0.1, -0.35, 0.12);
-    this.fruitMango.scale.setScalar(0.58);
-    this.scene.add(this.fruitMango);
-
-    this.fruitJackfruit = createJackfruitGroup();
-    this.fruitJackfruit.position.set(0, 0.1, 0.5);
-    this.fruitJackfruit.scale.setScalar(0.85);
-    this.fruitJackfruit.visible = false;
-    this.scene.add(this.fruitJackfruit);
-
-    this.fruitChikoo = createChikooGroup();
-    this.fruitChikoo.position.set(0, 0.15, 0.5);
-    this.fruitChikoo.scale.setScalar(0.85);
-    this.fruitChikoo.visible = false;
-    this.scene.add(this.fruitChikoo);
-
-    this.fruitBanana = createBananaGroup();
-    this.fruitBanana.position.set(0, 0.15, 0.5);
-    this.fruitBanana.scale.setScalar(0.85);
-    this.fruitBanana.visible = false;
-    this.scene.add(this.fruitBanana);
-
-    // 4. Standing Pouches (Finale Collection)
-    this.pouches = createPouchesGroup({
-      mango: this.textures.pouchMango,
-      chikku: this.textures.pouchChikku,
-      jackfruit: this.textures.pouchJackfruit,
-      banana: this.textures.pouchBanana
-    });
-    this.pouches.group.position.set(0, -0.2, 0.8);
-    this.pouches.group.scale.setScalar(0.9);
-    this.pouches.group.visible = false;
-    this.scene.add(this.pouches.group);
-
-    // 5. Orbiting Debris (Crisps, Chips, Celestial Spheres)
-    this.debris = createOrbitingDebris(36);
-    this.debris.group.position.set(0, 0.2, 0.3);
-    this.debris.group.scale.setScalar(0);
-    this.scene.add(this.debris.group);
+    // Show / hide Explore Collection button in Finale
+    const exploreBtn = document.getElementById('explore-collection-btn');
+    if (exploreBtn) {
+      if (progress > 0.88) {
+        exploreBtn.style.opacity = '1';
+        exploreBtn.style.pointerEvents = 'auto';
+        exploreBtn.style.transform = 'translate(-50%, 0)';
+      } else {
+        exploreBtn.style.opacity = '0';
+        exploreBtn.style.pointerEvents = 'none';
+        exploreBtn.style.transform = 'translate(-50%, 15px)';
+      }
+    }
   }
 
-  setupPostProcessing() {
-    // Custom chromatic aberration and analog film grain pass via orthographic scene
-    this.postScene = new THREE.Scene();
-    this.postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
-    this.renderTarget = new THREE.WebGLRenderTarget(this.width, this.height, {
-      format: THREE.RGBAFormat,
-      type: THREE.HalfFloatType,
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.LinearFilter
+  highlightSection(cfg) {
+    const swatches = document.querySelectorAll('.hud-swatch-chip');
+    swatches.forEach((sw) => {
+      if (sw.textContent.includes(cfg.color) || sw.textContent.toLowerCase().includes(cfg.name.toLowerCase())) {
+        sw.style.borderColor = '#171719';
+        sw.style.transform = 'scale(1.08)';
+      } else {
+        sw.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+        sw.style.transform = 'scale(1.0)';
+      }
     });
-
-    this.postMat = new THREE.ShaderMaterial({
-      uniforms: {
-        tDiffuse: { value: null },
-        uTime: { value: 0 },
-        uAberration: { value: 0.0022 },
-        uGrainStrength: { value: 0.035 }
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform sampler2D tDiffuse;
-        uniform float uTime;
-        uniform float uAberration;
-        uniform float uGrainStrength;
-        varying vec2 vUv;
-
-        // High frequency procedural grain
-        float random(vec2 p) {
-          vec2 k1 = vec2(23.14069263277926, 2.665144142690225);
-          return fract(cos(dot(p, k1)) * 12345.6789);
-        }
-
-        void main() {
-          vec2 uv = vUv;
-          vec2 dir = uv - vec2(0.5);
-          float dist = length(dir);
-
-          // Radial chromatic aberration
-          float r = texture2D(tDiffuse, uv + dir * uAberration * dist).r;
-          float g = texture2D(tDiffuse, uv).g;
-          float b = texture2D(tDiffuse, uv - dir * uAberration * dist).b;
-          vec3 col = vec3(r, g, b);
-
-          // Subtle analog film grain
-          float grain = (random(uv + sin(uTime * 1.5)) - 0.5) * uGrainStrength;
-          col += grain;
-
-          gl_FragColor = vec4(col, 1.0);
-        }
-      `
-    });
-
-    const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.postMat);
-    this.postScene.add(quad);
   }
 
+  /* -------------------------------------------------------------
+     5. Floating Crystalline Dust Particles (Three-Dimensional)
+  ------------------------------------------------------------- */
+  initDustParticles() {
+    this.particles = [];
+    const count = 45;
+    for (let i = 0; i < count; i++) {
+      this.particles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        z: Math.random() * 0.8 + 0.2,
+        size: Math.random() * 2.8 + 0.8,
+        speedX: (Math.random() - 0.5) * 0.35,
+        speedY: (Math.random() - 0.5) * 0.35 - 0.15,
+        opacity: Math.random() * 0.6 + 0.2,
+        color: ['#FF6A2A', '#DDF05B', '#C7B8F0', '#FFFFFF'][Math.floor(Math.random() * 4)]
+      });
+    }
+  }
+
+  updateDustParticles() {
+    if (!this.particleCtx) return;
+    const ctx = this.particleCtx;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = this.particleCanvas.width;
+    const h = this.particleCanvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const mouseOffsetX = this.mouse.x * 25 * dpr;
+    const mouseOffsetY = this.mouse.y * 25 * dpr;
+
+    this.particles.forEach((p) => {
+      p.x += p.speedX;
+      p.y += p.speedY;
+
+      if (p.x < 0) p.x = this.width;
+      if (p.x > this.width) p.x = 0;
+      if (p.y < 0) p.y = this.height;
+      if (p.y > this.height) p.y = 0;
+
+      const renderX = (p.x * dpr) + (mouseOffsetX * p.z);
+      const renderY = (p.y * dpr) + (mouseOffsetY * p.z);
+
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(renderX, renderY, p.size * dpr * p.z, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  /* -------------------------------------------------------------
+     6. Event Listeners & Interactive Handlers
+  ------------------------------------------------------------- */
   setupEvents() {
-    window.addEventListener('resize', () => this.onResize());
+    window.addEventListener('resize', () => {
+      this.onResize();
+      ScrollTrigger.refresh();
+    });
 
-    // Mouse Tracking Parallax
+    // Mouse Parallax Move
     window.addEventListener('mousemove', (e) => {
-      this.mouse.targetX = (e.clientX / this.width - 0.5) * 2;
-      this.mouse.targetY = -(e.clientY / this.height - 0.5) * 2;
+      this.mouse.targetX = (e.clientX / this.width) * 2 - 1;
+      this.mouse.targetY = (e.clientY / this.height) * 2 - 1;
+    });
 
-      if (this.isDragging) {
-        const deltaX = e.clientX - this.dragStart.x;
-        const deltaY = e.clientY - this.dragStart.y;
-        this.dragRotation.y += deltaX * 0.008;
-        this.dragRotation.x += deltaY * 0.008;
-        this.dragStart = { x: e.clientX, y: e.clientY };
+    // Touch Parallax Support
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        this.mouse.targetX = (e.touches[0].clientX / this.width) * 2 - 1;
+        this.mouse.targetY = (e.touches[0].clientY / this.height) * 2 - 1;
+      }
+    }, { passive: true });
+
+    // Drag Nudge (Horizontal Inspection Drag)
+    const container = this.container;
+    container.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button === 0) {
+        this.isDragging = true;
+        this.dragStartX = e.clientX;
+        this.container.style.cursor = 'grabbing';
       }
     });
 
-    // Click & Drag 360° Fruit Inspection (Mouse only to allow touch-scroll on mobile)
-    this.container.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'mouse') {
-        this.isDragging = true;
-        this.dragStart = { x: e.clientX, y: e.clientY };
-        this.container.style.cursor = 'grabbing';
-        audioEngine.playClick();
-      }
+    window.addEventListener('pointermove', (e) => {
+      if (!this.isDragging) return;
+      const deltaX = (e.clientX - this.dragStartX) / this.width;
+      this.dragProgressOffset = -deltaX * 0.05;
     });
 
     window.addEventListener('pointerup', () => {
       if (this.isDragging) {
         this.isDragging = false;
         this.container.style.cursor = 'grab';
-      }
-    });
-  }
-
-  setupScrollTriggers() {
-    // Master scroll progress linked to full body scroll height
-    ScrollTrigger.create({
-      trigger: '#scroll-container',
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1.0,
-      onUpdate: (self) => {
-        this.scrollProgress = self.progress;
-        this.updateDimensionalWorld(self.progress);
+        this.dragProgressOffset = 0;
       }
     });
 
-    // Pinned section triggers for DOM typography and telemetry HUD
-    const sections = [
-      { id: '#section-portal', pStart: 0.0, pEnd: 0.16, name: 'PORTAL', color: '#FF6A2A', hexList: ['PALE SAND7', 'Soft Lavender', '#243D9B'] },
-      { id: '#section-mango', pStart: 0.16, pEnd: 0.33, name: 'MANGO WORLD', color: '#FF6A2A', hexList: ['#FF6A2A', '#DDF05B', '#243D9B'] },
-      { id: '#section-jackfruit', pStart: 0.33, pEnd: 0.50, name: 'JACKFRUIT WORLD', color: '#DDF05B', hexList: ['#171719', '#DDF05B', '#C7B8F0'] },
-      { id: '#section-chikoo', pStart: 0.50, pEnd: 0.67, name: 'CHIKOO WORLD', color: '#A07045', hexList: ['#A07045', '#C7B8F0', '#FF6A2A'] },
-      { id: '#section-banana', pStart: 0.67, pEnd: 0.83, name: 'BANANA WORLD', color: '#F7E245', hexList: ['PALE SAND', '#C7B8F0', '#243D9B'] },
-      { id: '#section-finale', pStart: 0.83, pEnd: 1.00, name: 'COLLECTION FINALE', color: '#FF6A2A', hexList: ['#171719', '#FF6A2A', '#F3E9D7'] }
-    ];
-
-    sections.forEach((sec, idx) => {
-      const el = document.querySelector(sec.id);
-      const panel = el ? el.querySelector('.sticky-viewport-panel') : null;
-
-      // Initial state: only section 1 visible
-      if (panel) {
-        if (idx !== 0) {
-          gsap.set(panel, { opacity: 0, visibility: 'hidden' });
-        } else {
-          gsap.set(panel, { opacity: 1, visibility: 'visible' });
-        }
-
-        ScrollTrigger.create({
-          trigger: sec.id,
-          start: 'top 85%',
-          end: 'bottom 15%',
-          onEnter: () => {
-            gsap.to(panel, { opacity: 1, visibility: 'visible', duration: 0.35, overwrite: 'auto' });
-            this.updateTelemetryHUD(sec);
-          },
-          onLeave: () => {
-            gsap.to(panel, { opacity: 0, visibility: 'hidden', duration: 0.35, overwrite: 'auto' });
-          },
-          onEnterBack: () => {
-            gsap.to(panel, { opacity: 1, visibility: 'visible', duration: 0.35, overwrite: 'auto' });
-            this.updateTelemetryHUD(sec);
-          },
-          onLeaveBack: () => {
-            if (idx !== 0) {
-              gsap.to(panel, { opacity: 0, visibility: 'hidden', duration: 0.35, overwrite: 'auto' });
-            }
-          }
-        });
-      }
+    // Reset mouse target on leave
+    document.body.addEventListener('mouseleave', () => {
+      this.mouse.targetX = 0;
+      this.mouse.targetY = 0;
     });
   }
 
-  updateDimensionalWorld(p) {
-    if (this.backdropMat) {
-      this.backdropMat.uniforms.progress.value = p;
+  /* -------------------------------------------------------------
+     7. DOM Hotspots & Smooth Navigation
+  ------------------------------------------------------------- */
+  initDOMHotspots() {
+    // Scroll explore pill
+    const explorePill = document.getElementById('scroll-explore-pill');
+    if (explorePill) {
+      explorePill.addEventListener('click', () => {
+        audioEngine.playClick();
+        this.lenis.scrollTo('#section-mango', { duration: 1.5 });
+      });
     }
 
-    // 1. Stage: Portal Opening (0.0 -> 0.16)
-    if (p < 0.16) {
-      this.portalMonolith.group.visible = true;
-      this.fruitMango.visible = true;
-      this.pouches.group.visible = false;
-
-      // Hinge open portal rings
-      const openRatio = Math.min(1, p / 0.12);
-      this.portalMonolith.outerRing.rotation.y = openRatio * 0.65;
-      this.portalMonolith.outerRing.rotation.z = openRatio * 0.35;
-      this.portalMonolith.innerRing.rotation.y = -openRatio * 0.75;
-      this.portalMonolith.innerRing.rotation.z = -openRatio * 0.28;
-
-      // Fruit scale & position
-      this.fruitMango.scale.setScalar(0.58 + openRatio * 0.25);
-      this.fruitMango.position.set(0, 0.35, 0.5 + openRatio * 0.3);
-
-      // Expand orbiting debris outwards on scroll
-      this.debris.group.scale.setScalar(openRatio * 0.95);
-      this.debris.group.visible = openRatio > 0.05;
-
-      this.scene.background = new THREE.Color(0xf3e9d7);
-      this.accentLight.intensity = 0;
+    // Top Brand Logo
+    const brandLogo = document.querySelector('.hud-brand-logo');
+    if (brandLogo) {
+      brandLogo.addEventListener('click', (e) => {
+        e.preventDefault();
+        audioEngine.playClick();
+        this.lenis.scrollTo(0, { duration: 1.2 });
+      });
     }
-    // 2. Stage: The Mango World (0.16 -> 0.33)
-    else if (p < 0.33) {
-      this.portalMonolith.group.visible = false;
-      this.fruitMango.visible = true;
-      this.pouches.group.visible = false;
-      this.debris.group.visible = true;
-      this.debris.group.scale.setScalar(1.0);
 
-      this.fruitMango.scale.setScalar(0.95);
-      this.fruitMango.position.set(0, 0.2, 0.8);
-
-      this.scene.background = new THREE.Color(0xf3e9d7);
-      this.accentLight.intensity = 0.5;
-      this.accentLight.color.setHex(0xff6a2a);
+    // Telemetry Arrows
+    const arrowUp = document.querySelector('.telemetry-arrow:first-child');
+    const arrowDown = document.querySelector('.telemetry-arrow:last-child');
+    if (arrowUp) {
+      arrowUp.style.cursor = 'pointer';
+      arrowUp.addEventListener('click', () => {
+        audioEngine.playClick();
+        this.lenis.scrollTo(Math.max(0, window.scrollY - window.innerHeight), { duration: 1.0 });
+      });
     }
-    // 3. Stage: The Jackfruit World (0.33 -> 0.50)
-    else if (p < 0.50) {
-      this.portalMonolith.group.visible = false;
-      this.fruitMango.visible = false;
-      this.pouches.group.visible = false;
-      this.debris.group.visible = true;
-      this.debris.group.scale.setScalar(1.05);
-
-      this.accentLight.intensity = 2.2;
-      this.accentLight.color.setHex(0xddf05b);
-    }
-    // 4. Stage: The Chikoo World (0.50 -> 0.67)
-    else if (p < 0.67) {
-      this.portalMonolith.group.visible = false;
-      this.fruitMango.visible = false;
-      this.pouches.group.visible = false;
-      this.debris.group.visible = true;
-      this.debris.group.scale.setScalar(1.0);
-
-      this.accentLight.intensity = 1.0;
-      this.accentLight.color.setHex(0xffaa44);
-    }
-    // 5. Stage: The Banana World (0.67 -> 0.83)
-    else if (p < 0.83) {
-      this.portalMonolith.group.visible = false;
-      this.fruitMango.visible = false;
-      this.pouches.group.visible = false;
-      this.debris.group.visible = true;
-      this.debris.group.scale.setScalar(0.95);
-
-      this.accentLight.intensity = 1.2;
-      this.accentLight.color.setHex(0xf7e245);
-    }
-    // 6. Stage: The Finale (0.83 -> 1.00)
-    else {
-      this.portalMonolith.group.visible = false;
-      this.fruitMango.visible = false;
-      this.pouches.group.visible = true;
-      this.debris.group.visible = true;
-      this.debris.group.scale.setScalar(1.1);
-
-      this.scene.background = new THREE.Color(0x171719);
-      this.accentLight.intensity = 1.5;
-      this.accentLight.color.setHex(0xff6a2a);
+    if (arrowDown) {
+      arrowDown.style.cursor = 'pointer';
+      arrowDown.addEventListener('click', () => {
+        audioEngine.playClick();
+        this.lenis.scrollTo(window.scrollY + window.innerHeight, { duration: 1.0 });
+      });
     }
   }
 
-  updateTelemetryHUD(sec) {
-    const indicatorPip = document.getElementById('telemetry-pip');
-    const colorTags = document.getElementById('telemetry-colors');
+  /* -------------------------------------------------------------
+     8. Canvas Draw Frame (Edge-to-Edge Cover Scaling)
+  ------------------------------------------------------------- */
+  drawFrame(img) {
+    if (!img || !this.ctx) return;
+    const cw = this.canvas.width;
+    const ch = this.canvas.height;
+    const iw = img.naturalWidth || img.width;
+    const ih = img.naturalHeight || img.height;
+    if (!iw || !ih) return;
 
-    if (indicatorPip) {
-      const pct = Math.round(sec.pStart * 100);
-      indicatorPip.style.transform = `translateY(${sec.pStart * 120}px)`;
-    }
+    // Cover scaling: fills entire viewport seamlessly with 0 letterbox bars
+    const scale = Math.max(cw / iw, ch / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const dx = (cw - dw) * 0.5;
+    const dy = (ch - dh) * 0.5;
 
-    if (colorTags && sec.hexList) {
-      colorTags.innerHTML = sec.hexList
-        .map((hex) => `<span class="telemetry-color-pill">${hex}</span>`)
-        .join('');
-    }
+    this.ctx.drawImage(img, dx, dy, dw, dh);
   }
 
-  onResize() {
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
-
-    this.camera.aspect = this.width / this.height;
-    this.camera.updateProjectionMatrix();
-
-    this.renderer.setSize(this.width, this.height);
-    this.renderTarget.setSize(this.width, this.height);
-  }
-
+  /* -------------------------------------------------------------
+     9. 60 FPS Render & Dynamic 3D Parallax Loop
+  ------------------------------------------------------------- */
   animate() {
-    requestAnimationFrame(() => this.animate());
+    requestAnimationFrame(this.animate);
 
-    const delta = this.clock.getDelta();
-    const elapsedTime = this.clock.getElapsedTime();
+    // 1. Mouse Lerping for Fluid 3D Perspective Tilt
+    this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.08;
+    this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.08;
 
-    // Lerp mouse coordinates
-    this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
-    this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
+    const tiltX = -this.mouse.y * 2.8;
+    const tiltY = this.mouse.x * 3.6;
 
-    // Camera Parallax
-    this.camera.position.x = this.mouse.x * 0.45;
-    this.camera.position.y = this.mouse.y * 0.35;
-    this.camera.lookAt(0, 0, 0);
+    // Apply tactile 3D perspective tilt to master canvas
+    this.canvas.style.transform = `perspective(1200px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) scale3d(1.015, 1.015, 1.015)`;
 
-    // Active fruit idle floating & user drag rotation
-    const activeFruit = this.fruitMango.visible
-      ? this.fruitMango
-      : this.fruitJackfruit.visible
-      ? this.fruitJackfruit
-      : this.fruitChikoo.visible
-      ? this.fruitChikoo
-      : this.fruitBanana.visible
-      ? this.fruitBanana
-      : null;
+    // 2. Frame Interpolation based on Scroll Progress + Drag Nudge
+    const activeProgress = Math.min(1.0, Math.max(0.0, this.targetScrollProgress + this.dragProgressOffset));
+    const targetFrame = Math.round(activeProgress * (TOTAL_FRAMES - 1));
 
-    if (activeFruit) {
-      if (!this.isDragging) {
-        activeFruit.rotation.y += 0.006 + Math.abs(this.scrollVelocity) * 0.015;
-        activeFruit.rotation.x = Math.sin(elapsedTime * 1.2) * 0.08 + this.dragRotation.x;
-      } else {
-        activeFruit.rotation.y = this.dragRotation.y;
-        activeFruit.rotation.x = this.dragRotation.x;
+    // Smooth sub-frame lerping
+    this.currentFrameIndex += (targetFrame - this.currentFrameIndex) * 0.35;
+    const displayIndex = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.round(this.currentFrameIndex)));
+
+    // 3. Render Image Frame with Nearest-Loaded Fallback
+    const targetImg = this.frames[displayIndex];
+    if (targetImg && targetImg.complete) {
+      this.nearestLoaded = targetImg;
+      this.drawFrame(targetImg);
+    } else if (this.nearestLoaded) {
+      // Find closest already-loaded frame to avoid any blank flash
+      let closest = this.nearestLoaded;
+      for (let offset = 1; offset < 20; offset++) {
+        if (displayIndex + offset < TOTAL_FRAMES && this.frames[displayIndex + offset]?.complete) {
+          closest = this.frames[displayIndex + offset];
+          break;
+        }
+        if (displayIndex - offset >= 0 && this.frames[displayIndex - offset]?.complete) {
+          closest = this.frames[displayIndex - offset];
+          break;
+        }
       }
-      activeFruit.position.y = Math.sin(elapsedTime * 1.5) * 0.08;
+      this.drawFrame(closest);
     }
 
-    // Orbiting Debris Physics
-    if (this.debris && this.debris.items) {
-      const speedMultiplier = 1.0 + Math.abs(this.scrollVelocity) * 2.5;
-      this.debris.items.forEach((item) => {
-        item.angle += item.speed * delta * speedMultiplier;
-        const x = Math.cos(item.angle) * item.radius;
-        const z = Math.sin(item.angle) * (item.radius * 0.75);
-        const y = Math.sin(item.angle * 2.0) * item.inclination + item.yOffset;
-        item.mesh.position.set(x, y, z);
-        item.mesh.rotation.x += item.rotX;
-        item.mesh.rotation.y += item.rotY;
-      });
-    }
-
-    // Pouches idle subtle anti-gravity drift
-    if (this.pouches && this.pouches.pouches) {
-      this.pouches.pouches.forEach((p, idx) => {
-        p.subGroup.position.y = Math.sin(elapsedTime * 1.5 + idx * 0.8) * 0.06;
-      });
-    }
-
-    // Update Post-Processing Time
-    if (this.postMat) {
-      this.postMat.uniforms.uTime.value = elapsedTime;
-      this.postMat.uniforms.uAberration.value = 0.0022 + Math.abs(this.scrollVelocity) * 0.003;
-    }
-
-    // Render Scene to Target, then Post-Processing Quad to Screen
-    this.renderer.setRenderTarget(this.renderTarget);
-    this.renderer.render(this.scene, this.camera);
-
-    this.renderer.setRenderTarget(null);
-    this.postMat.uniforms.tDiffuse.value = this.renderTarget.texture;
-    this.renderer.render(this.postScene, this.postCamera);
+    // 4. Update Ambient 3D Dust Particles
+    this.updateDustParticles();
   }
 }
 
-// Instantiate Experience when DOM is ready
+// Instantiate master experience once DOM is ready
+let experienceInstance = null;
 window.addEventListener('DOMContentLoaded', () => {
-  window.webglExperience = new WebGLExperience();
+  experienceInstance = new WebGLExperience();
+  window.webglExperience = experienceInstance;
 });
+
+export { WebGLExperience };
