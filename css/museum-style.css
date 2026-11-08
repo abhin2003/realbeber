@@ -1155,3 +1155,120 @@ body {
   border: none !important;
   box-shadow: none !important;
 }
+
+
+/* -------------------------------------------------------------------------
+   NO CURSOR TILT & CRISP HUD NAVIGATION ACROSS ALL WORLDS
+------------------------------------------------------------------------- */
+#webgl-canvas-container,
+#webgl-canvas-container canvas {
+  transform: none !important;
+  perspective: none !important;
+  cursor: default !important;
+}
+
+.floating-hud-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  padding: 18px 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  z-index: 50 !important;
+  pointer-events: none !important;
+}
+
+.hud-left-group, .hud-right-actions {
+  pointer-events: auto !important;
+}
+
+.hud-brand-logo {
+  font-family: var(--font-display) !important;
+  font-weight: 800 !important;
+  font-size: 1.35rem !important;
+  letter-spacing: 0.12em !important;
+  color: var(--dark-ink) !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: opacity 0.2s ease, color 0.3s ease !important;
+}
+
+.hud-brand-logo:hover {
+  opacity: 0.8 !important;
+}
+
+.hud-nav-links {
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  margin-left: 20px !important;
+}
+
+.hud-nav-links a {
+  font-family: var(--font-mono) !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  color: var(--dark-ink) !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  padding: 6px 12px !important;
+  border-radius: 999px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.hud-nav-links a:hover {
+  background: rgba(23, 23, 25, 0.08) !important;
+  color: var(--electric-tangerine) !important;
+}
+
+/* Dark mode theme when in Finale */
+body.theme-dark .hud-brand-logo,
+body.theme-dark .hud-nav-links a {
+  color: #ffffff !important;
+}
+body.theme-dark .hud-hamburger-btn span {
+  background-color: #ffffff !important;
+}
+body.theme-dark .hud-nav-links a:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+
+/* Brand logo invisible click target over the baked-in REALBEBER text */
+.hud-brand-logo {
+  opacity: 0 !important;
+  pointer-events: auto !important;
+  width: 150px !important;
+  height: 38px !important;
+  display: inline-block !important;
+  cursor: pointer !important;
+}
+
+/* Floating clean nav pill */
+.hud-nav-links {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  padding: 6px 16px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+  margin-left: 28px !important;
+  gap: 16px !important;
+}
+
+body.theme-dark .hud-nav-links {
+  background: rgba(23, 23, 25, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-dark .hud-nav-links a {
+  color: #ffffff !important;
+}

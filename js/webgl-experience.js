@@ -1,7 +1,9 @@
 /**
- * Realbeber - Master WebGL 3D Experience Engine (High-Performance 60/120 FPS)
- * Eliminates all scroll lag with direct Lenis frame binding, background GPU decoding,
- * dirty-flag canvas rendering, and high-clarity 1080p Lanczos frame scaling.
+ * Realbeber - Master WebGL 3D Experience Engine
+ * - Zero Cursor Tilt (rock-solid, locked canvas with no left/right wobble)
+ * - Precision World Navigation (exact frame targeting for Portal, Mango, Jackfruit, Chikoo, Banana, Finale)
+ * - 60/120 FPS Direct Frame Binding with Lenis Smooth Scroll
+ * - Milestone Preloading & Background GPU Frame Decoding
  */
 
 import gsap from 'gsap';
@@ -14,6 +16,16 @@ gsap.registerPlugin(ScrollTrigger);
 const TOTAL_FRAMES = 240;
 const BASE_FRAME_URL = '/screen_sequence/frame_';
 
+// Exact calibrated scroll ratios corresponding to the center of each 3D world
+const WORLD_RATIOS = {
+  portal: 0.000,     // Frame 0: The Portal Monolith
+  mango: 0.314,      // Frame 75: The Mango World (curved architectural dunes & orbiting chips)
+  jackfruit: 0.502,  // Frame 120: The Jackfruit World (acid yellow & green archways)
+  chikoo: 0.648,     // Frame 155: The Chikoo World (warm clay arches & velvety chikoo)
+  banana: 0.774,     // Frame 185: The Banana World (clean architectural curves & slices)
+  finale: 1.000      // Frame 235: The Finale (4 standing Realbeber packs on podiums)
+};
+
 class WebGLExperience {
   constructor() {
     this.container = document.getElementById('webgl-canvas-container');
@@ -24,14 +36,9 @@ class WebGLExperience {
     this.lastRenderedIndex = -1;
     this.scrollVelocity = 0;
 
-    // Mouse Tracking for Smooth 3D Perspective Tilt
-    this.mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
-    this.tilt = { x: 0, y: 0 };
-
     // Frames storage & preloading
     this.frames = new Array(TOTAL_FRAMES);
     this.loadedFrames = new Set();
-    this.nearestKeyframe = 0;
 
     this.initCanvas();
     this.initLenis();
@@ -39,21 +46,16 @@ class WebGLExperience {
     this.preloadMilestoneFrames();
     this.setupEvents();
     this.setupScrollTriggers();
-
-    // High performance animation loop
-    this.animate = this.animate.bind(this);
-    requestAnimationFrame(this.animate);
   }
 
   /* -------------------------------------------------------------
-     1. High-DPI Canvas Setup with Hardware Acceleration
+     1. High-DPI Canvas Setup (Locked, Zero Cursor Tilt)
   ------------------------------------------------------------- */
   initCanvas() {
     this.container.innerHTML = '';
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'scene-scrubber-canvas';
 
-    // Optimize 2D context for high-throughput video/frame drawing
     this.ctx = this.canvas.getContext('2d', {
       alpha: false,
       desynchronized: true
@@ -61,16 +63,20 @@ class WebGLExperience {
     this.ctx.imageSmoothingEnabled = true;
     this.ctx.imageSmoothingQuality = 'high';
 
-    this.canvas.style.position = 'absolute';
+    // Completely lock canvas transform: ZERO tilt when moving cursor left/right
+    this.canvas.style.position = 'fixed';
     this.canvas.style.top = '0';
     this.canvas.style.left = '0';
     this.canvas.style.width = '100vw';
     this.canvas.style.height = '100vh';
     this.canvas.style.objectFit = 'cover';
-    this.canvas.style.willChange = 'transform';
-    this.canvas.style.transform = 'translate3d(0, 0, 0)';
+    this.canvas.style.transform = 'none';
+    this.canvas.style.pointerEvents = 'none';
 
+    this.container.style.transform = 'none';
+    this.container.style.perspective = 'none';
     this.container.appendChild(this.canvas);
+
     this.onResize();
   }
 
@@ -87,13 +93,12 @@ class WebGLExperience {
       this.ctx.imageSmoothingQuality = 'high';
     }
 
-    // Force re-render of current frame
     this.lastRenderedIndex = -1;
     this.renderFrame(this.targetFrame);
   }
 
   /* -------------------------------------------------------------
-     2. Asynchronous Milestone Preloader (Zero Network Choke)
+     2. Asynchronous Milestone Preloader
   ------------------------------------------------------------- */
   preloadMilestoneFrames() {
     const formatNumber = (num) => String(num).padStart(3, '0');
@@ -105,7 +110,6 @@ class WebGLExperience {
         const img = new Image();
         img.src = `${BASE_FRAME_URL}${formatNumber(index)}.webp`;
 
-        // Use modern async decode to prevent ANY main-thread UI jank
         if (img.decode) {
           img.decode().then(() => {
             this.frames[index] = img;
@@ -115,7 +119,6 @@ class WebGLExperience {
             }
             resolve(img);
           }).catch(() => {
-            // Fallback load on error
             img.onload = () => {
               this.frames[index] = img;
               this.loadedFrames.add(index);
@@ -132,21 +135,16 @@ class WebGLExperience {
       });
     };
 
-    // Phase 1: Immediately load frame 0 for 0ms initial paint
+    // Phase 1: Frame 0 for instant initial render
     loadFrame(0).then(() => {
-      // Phase 2: Load 24 key milestones across the entire scroll journey
-      const milestones = [];
-      for (let i = 0; i < TOTAL_FRAMES; i += 10) {
-        milestones.push(i);
-      }
-      if (!milestones.includes(TOTAL_FRAMES - 1)) milestones.push(TOTAL_FRAMES - 1);
-
+      // Phase 2: Key milestones for each world
+      const milestones = [0, 20, 45, 75, 95, 120, 140, 155, 175, 185, 210, 235, 239];
       Promise.all(milestones.map(loadFrame)).then(() => {
-        // Phase 3: Progressively buffer all in-between frames in small 8-frame batches
+        // Phase 3: Buffer all remaining frames progressively
         let nextIdx = 1;
         const loadBatch = () => {
           const batch = [];
-          for (let k = 0; k < 8 && nextIdx < TOTAL_FRAMES; k++) {
+          for (let k = 0; k < 12 && nextIdx < TOTAL_FRAMES; k++) {
             if (!this.loadedFrames.has(nextIdx)) {
               batch.push(loadFrame(nextIdx));
             }
@@ -159,7 +157,7 @@ class WebGLExperience {
                 if (window.requestIdleCallback) {
                   window.requestIdleCallback(loadBatch, { timeout: 120 });
                 } else {
-                  setTimeout(loadBatch, 20);
+                  setTimeout(loadBatch, 16);
                 }
               }
             });
@@ -172,7 +170,7 @@ class WebGLExperience {
   }
 
   /* -------------------------------------------------------------
-     3. Lenis Smooth Scroll with DIRECT Frame Binding (Zero Lag)
+     3. Lenis Smooth Scroll with Direct Frame Scrubbing (Zero Lag)
   ------------------------------------------------------------- */
   initLenis() {
     this.lenis = new Lenis({
@@ -181,17 +179,14 @@ class WebGLExperience {
       orientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 1.0,
-      touchMultiplier: 1.6
+      touchMultiplier: 1.5
     });
 
-    // Lenis updates scroll smoothly at 60-120Hz
     this.lenis.on('scroll', (e) => {
       ScrollTrigger.update();
       this.scrollVelocity = e.velocity || 0;
       audioEngine.modulateVelocity(this.scrollVelocity);
 
-      // Direct, instantaneous frame calculation from scroll progress
-      // NO DOUBLE LERPING = ZERO SLUGGISHNESS!
       if (e.limit > 0) {
         this.scrollProgress = Math.min(1.0, Math.max(0.0, e.scroll / e.limit));
         this.targetFrame = Math.min(TOTAL_FRAMES - 1, Math.max(0, Math.round(this.scrollProgress * (TOTAL_FRAMES - 1))));
@@ -203,36 +198,45 @@ class WebGLExperience {
       this.lenis.raf(time * 1000);
     });
     gsap.ticker.lagSmoothing(0);
-
-    // Initial hash scroll & link smooth scroll intercept
-    if (window.location.hash) {
-      setTimeout(() => {
-        this.lenis.scrollTo(window.location.hash, { immediate: true });
-        ScrollTrigger.refresh();
-      }, 150);
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach((a) => {
-      a.addEventListener('click', (e) => {
-        const href = a.getAttribute('href');
-        if (href && href.length > 1) {
-          e.preventDefault();
-          this.lenis.scrollTo(href, { duration: 1.3 });
-          audioEngine.playClick();
-        }
-      });
-    });
   }
 
   /* -------------------------------------------------------------
-     4. ScrollTrigger Choreography & Telemetry Update
+     4. Navigation to Specific World (Smooth Page Transitions)
+  ------------------------------------------------------------- */
+  navigateToWorld(worldName, duration = 1.3) {
+    const ratio = WORLD_RATIOS[worldName] !== undefined ? WORLD_RATIOS[worldName] : 0;
+    const limit = this.lenis.limit || (document.documentElement.scrollHeight - window.innerHeight);
+    const targetScrollY = limit * ratio;
+
+    audioEngine.playClick();
+    this.lenis.scrollTo(targetScrollY, { duration });
+  }
+
+  getCurrentWorldIndex() {
+    const p = this.scrollProgress;
+    if (p < 0.20) return 0; // Portal
+    if (p < 0.42) return 1; // Mango
+    if (p < 0.58) return 2; // Jackfruit
+    if (p < 0.72) return 3; // Chikoo
+    if (p < 0.88) return 4; // Banana
+    return 5; // Finale
+  }
+
+  navigateStep(direction) {
+    const worlds = ['portal', 'mango', 'jackfruit', 'chikoo', 'banana', 'finale'];
+    const currentIdx = this.getCurrentWorldIndex();
+    const nextIdx = Math.min(worlds.length - 1, Math.max(0, currentIdx + direction));
+    this.navigateToWorld(worlds[nextIdx], 1.2);
+  }
+
+  /* -------------------------------------------------------------
+     5. ScrollTrigger Telemetry
   ------------------------------------------------------------- */
   setupScrollTriggers() {
     ScrollTrigger.create({
       trigger: '#scroll-container',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: false, // Handled directly by Lenis for maximum smoothness
       onUpdate: (self) => {
         this.updateTelemetry(self.progress);
       }
@@ -240,6 +244,12 @@ class WebGLExperience {
   }
 
   updateTelemetry(progress) {
+    if (progress > 0.88) {
+      document.body.classList.add('theme-dark');
+    } else {
+      document.body.classList.remove('theme-dark');
+    }
+
     const pip = document.getElementById('telemetry-pip');
     if (pip) {
       pip.style.top = `${Math.min(100, Math.max(0, progress * 100))}%`;
@@ -258,14 +268,13 @@ class WebGLExperience {
   }
 
   /* -------------------------------------------------------------
-     5. High-Clarity Canvas Frame Render (Dirty-Flag Optimized)
+     6. High-Clarity Canvas Frame Render (Dirty-Flag Optimized)
   ------------------------------------------------------------- */
   renderFrame(frameIndex) {
     if (frameIndex === this.lastRenderedIndex) return;
 
     let img = this.frames[frameIndex];
 
-    // If target frame not buffered yet, use nearest loaded milestone
     if (!img || !img.complete) {
       let nearest = null;
       let minDiff = Infinity;
@@ -287,7 +296,6 @@ class WebGLExperience {
     const ih = img.naturalHeight || img.height;
     if (!iw || !ih) return;
 
-    // Edge-to-edge cover scaling with high-clarity sub-pixel precision
     const scale = Math.max(cw / iw, ch / ih);
     const dw = iw * scale;
     const dh = ih * scale;
@@ -299,77 +307,68 @@ class WebGLExperience {
   }
 
   /* -------------------------------------------------------------
-     6. Smooth Mouse Parallax Tilt
+     7. Setup Events & Hotspots
   ------------------------------------------------------------- */
   setupEvents() {
     window.addEventListener('resize', () => {
       this.onResize();
       ScrollTrigger.refresh();
     });
-
-    window.addEventListener('mousemove', (e) => {
-      this.mouse.targetX = (e.clientX / this.width) * 2 - 1;
-      this.mouse.targetY = (e.clientY / this.height) * 2 - 1;
-    });
-
-    document.body.addEventListener('mouseleave', () => {
-      this.mouse.targetX = 0;
-      this.mouse.targetY = 0;
-    });
   }
 
   initDOMHotspots() {
-    const explorePill = document.getElementById('scroll-explore-pill');
-    if (explorePill) {
-      explorePill.addEventListener('click', () => {
-        audioEngine.playClick();
-        this.lenis.scrollTo('#section-mango', { duration: 1.4 });
+    // Navigation Links
+    document.querySelectorAll('a[href^="#"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = a.getAttribute('href');
+        if (href === '#section-portal' || href === '#') {
+          this.navigateToWorld('portal');
+        } else if (href === '#section-mango') {
+          this.navigateToWorld('mango');
+        } else if (href === '#section-jackfruit') {
+          this.navigateToWorld('jackfruit');
+        } else if (href === '#section-chikoo') {
+          this.navigateToWorld('chikoo');
+        } else if (href === '#section-banana') {
+          this.navigateToWorld('banana');
+        } else if (href === '#section-finale') {
+          this.navigateToWorld('finale');
+        }
       });
-    }
+    });
 
+    // Brand Logo
     const brandLogo = document.querySelector('.hud-brand-logo');
     if (brandLogo) {
       brandLogo.addEventListener('click', (e) => {
         e.preventDefault();
-        audioEngine.playClick();
-        this.lenis.scrollTo(0, { duration: 1.2 });
+        this.navigateToWorld('portal');
       });
     }
 
+    // Scroll explore pill
+    const explorePill = document.getElementById('scroll-explore-pill');
+    if (explorePill) {
+      explorePill.addEventListener('click', () => {
+        this.navigateToWorld('mango');
+      });
+    }
+
+    // Telemetry Arrows: Smooth step to next / previous world
     const arrowUp = document.querySelector('.telemetry-arrow:first-child');
     const arrowDown = document.querySelector('.telemetry-arrow:last-child');
     if (arrowUp) {
+      arrowUp.style.cursor = 'pointer';
       arrowUp.addEventListener('click', () => {
-        audioEngine.playClick();
-        this.lenis.scrollTo(Math.max(0, window.scrollY - window.innerHeight), { duration: 0.9 });
+        this.navigateStep(-1);
       });
     }
     if (arrowDown) {
+      arrowDown.style.cursor = 'pointer';
       arrowDown.addEventListener('click', () => {
-        audioEngine.playClick();
-        this.lenis.scrollTo(window.scrollY + window.innerHeight, { duration: 0.9 });
+        this.navigateStep(1);
       });
-    }
-  }
-
-  /* -------------------------------------------------------------
-     7. 60 FPS Parallax Loop (Zero Redraw When Idle)
-  ------------------------------------------------------------- */
-  animate() {
-    requestAnimationFrame(this.animate);
-
-    // Subtle 3D perspective tilt interpolation
-    const dx = this.mouse.targetX - this.mouse.x;
-    const dy = this.mouse.targetY - this.mouse.y;
-
-    if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
-      this.mouse.x += dx * 0.08;
-      this.mouse.y += dy * 0.08;
-
-      const tiltX = -this.mouse.y * 2.2;
-      const tiltY = this.mouse.x * 2.8;
-
-      this.canvas.style.transform = `perspective(1200px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
     }
   }
 }
