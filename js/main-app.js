@@ -139,7 +139,11 @@ class MainApp {
     if (this.scrollExploreBtn) {
       this.scrollExploreBtn.addEventListener('click', () => {
         audioEngine.playClick();
-        window.webglExperience?.lenis?.scrollTo('#section-mango', { duration: 1.5 });
+        if (window.webglExperience?.navigateToWorld) {
+          window.webglExperience.navigateToWorld('mango');
+        } else {
+          window.webglExperience?.lenis?.scrollTo('#section-mango', { duration: 1.5 });
+        }
       });
     }
 
