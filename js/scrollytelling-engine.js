@@ -1,7 +1,7 @@
 /**
- * REALBEBER & CO. — SCROLLYTELLING ENGINE
- * Apple-Level 120-Frame Canvas Scrubbing, 4-Flavor Crossfade,
- * Frame Lerp Interpolation & Synchronized Story Beats
+ * REALBEBER & CO. — PERFORMANCE-FOCUSED SCROLLYTELLING ENGINE
+ * High-DPI Retina Backing Store, Whole-Pixel Math, Zero-Jitter Lerp,
+ * createImageBitmap Asynchronous Decoding, and Grounded Center Stage UX.
  */
 
 export const FLAVORS = {
@@ -11,7 +11,7 @@ export const FLAVORS = {
     tagline: 'Sun-ripened Alphonso notes',
     accentStart: '#FFB000',
     accentEnd: '#FF6A00',
-    glow: 'rgba(255, 120, 0, 0.18)',
+    glow: 'rgba(255, 120, 0, 0.16)',
     folder: 'sequences/mango',
     heroSub: 'Freeze-dried at peak ripeness. Crunchy, light, and bursting with tropical honey sweetness.'
   },
@@ -21,7 +21,7 @@ export const FLAVORS = {
     tagline: 'Caramel malt fudge sweetness',
     accentStart: '#C68B59',
     accentEnd: '#8B5A2B',
-    glow: 'rgba(198, 139, 89, 0.20)',
+    glow: 'rgba(198, 139, 89, 0.18)',
     folder: 'sequences/chikku',
     heroSub: 'Velvety Kerala sapodilla freeze-dried into honeycomb wafers with rich caramel notes.'
   },
@@ -31,7 +31,7 @@ export const FLAVORS = {
     tagline: 'Sweet tropical golden petals',
     accentStart: '#F5C518',
     accentEnd: '#E3A008',
-    glow: 'rgba(245, 197, 24, 0.18)',
+    glow: 'rgba(245, 197, 24, 0.16)',
     folder: 'sequences/jackfruit',
     heroSub: 'Pure Varikka jackfruit freeze-dried to crisp perfection with intense aromatic aroma.'
   },
@@ -41,33 +41,33 @@ export const FLAVORS = {
     tagline: 'Crisp natural crunch, pure Kerala',
     accentStart: '#FFE066',
     accentEnd: '#F7C948',
-    glow: 'rgba(255, 224, 102, 0.16)',
+    glow: 'rgba(255, 224, 102, 0.14)',
     folder: 'sequences/banana',
     heroSub: 'Delicate sun-ripened Kerala banana slices, airy crunch with zero oil or sugar added.'
   }
 };
 
 const TOTAL_FRAMES = 120;
+const INITIAL_PRELOAD_COUNT = 20;
 
 class ScrollytellingEngine {
   constructor() {
     this.activeFlavor = 'mango';
     this.framesCache = {
-      mango: [],
-      chikku: [],
-      jackfruit: [],
-      banana: []
+      mango: new Array(TOTAL_FRAMES),
+      chikku: new Array(TOTAL_FRAMES),
+      jackfruit: new Array(TOTAL_FRAMES),
+      banana: new Array(TOTAL_FRAMES)
     };
 
     this.currentFrame = 0;
     this.targetFrame = 0;
-    this.isRendering = false;
-    this.crossfadeAlpha = 1.0;
-    this.previousFlavor = null;
+    this.lastDrawnFrame = -1;
+    this.isTicking = false;
 
     // DOM Elements
     this.canvas = document.getElementById('scrollytelling-canvas');
-    this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+    this.ctx = this.canvas ? this.canvas.getContext('2d', { alpha: true, desynchronized: true }) : null;
     this.wrapper = document.getElementById('scrollytelling-section');
     this.navbar = document.getElementById('apple-navbar');
     this.preloader = document.getElementById('preloader');
@@ -81,7 +81,7 @@ class ScrollytellingEngine {
     this.beatCrunch = document.getElementById('beat-crunch');
     this.beatCta = document.getElementById('beat-cta');
 
-    // Cart
+    // Cart State
     this.cart = [
       { id: 'mango', name: 'Mango Frost Chips', price: 149, qty: 1, img: 'assets/products/mango_clean_pouch.png' }
     ];
@@ -94,90 +94,147 @@ class ScrollytellingEngine {
     this.bindEvents();
     this.renderCart();
 
-    // Start preloading primary flavor (Mango)
-    await this.preloadFlavorFrames('mango', (progress) => {
-      if (this.preloadBar) this.preloadBar.style.width = `${progress * 100}%`;
-      if (this.preloadText) this.preloadText.textContent = `Preloading 4K Visuals ${Math.round(progress * 100)}%`;
-    });
+    // 1. Preload initial 20 frames immediately for instant interactive start
+    await this.preloadInitialBatch('mango');
 
-    // Dismiss preloader
+    // Dismiss preloader as soon as the first interactive frames are ready
     if (this.preloader) {
       this.preloader.classList.add('loaded');
     }
 
-    // Initial render
-    this.render();
+    // Force immediate first frame render
+    this.drawFrame(0);
 
-    // Preload remaining flavors in background
-    this.preloadRemainingFlavors();
+    // 2. Load remaining frames progressively in background
+    this.loadRemainingFrames('mango');
+
+    // 3. Background-preload secondary flavors
+    setTimeout(() => {
+      this.preloadSecondaryFlavors();
+    }, 1500);
   }
 
+  /**
+   * STEP 2: Strict High-DPI Canvas Backing Store
+   * Matches backing store exactly to CSS size * DPR (capped at 2 for performance)
+   * Resets transform matrix and sets high-quality image smoothing
+   */
   setupCanvas() {
-    if (!this.canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const rect = this.canvas.getBoundingClientRect();
-    const w = rect.width || window.innerWidth;
-    const h = rect.height || window.innerHeight;
+    if (!this.canvas || !this.ctx) return;
 
-    this.canvas.width = w * dpr;
-    this.canvas.height = h * dpr;
-    if (this.ctx) {
-      this.ctx.scale(dpr, dpr);
+    // Cap DPR at 2.0 to balance crystal clarity with memory/performance
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const cssWidth = window.innerWidth;
+    const cssHeight = window.innerHeight;
+
+    // Set backing store dimensions
+    this.canvas.width = Math.round(cssWidth * dpr);
+    this.canvas.height = Math.round(cssHeight * dpr);
+
+    // Keep CSS dimensions strictly matching viewport
+    this.canvas.style.width = `${cssWidth}px`;
+    this.canvas.style.height = `${cssHeight}px`;
+
+    // Reset transform matrix and scale for DPR
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(dpr, dpr);
+
+    // Enable high-quality texture smoothing
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
+
+    // Immediate redraw on resize to prevent blur
+    this.lastDrawnFrame = -1;
+    this.drawFrame(Math.round(this.currentFrame));
+  }
+
+  /**
+   * STEP 4: Asynchronous Bitmap Decoding with createImageBitmap & decode()
+   */
+  async loadSingleFrame(folder, index) {
+    const frameNum = String(index).padStart(3, '0');
+    const src = `${folder}/frame_${frameNum}.webp`;
+
+    try {
+      if ('createImageBitmap' in window) {
+        const response = await fetch(src);
+        const blob = await response.blob();
+        return await createImageBitmap(blob);
+      } else {
+        const img = new Image();
+        img.src = src;
+        await img.decode();
+        return img;
+      }
+    } catch {
+      // Fallback for standard Image loader
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+      });
     }
   }
 
-  async preloadFlavorFrames(flavorKey, onProgress) {
-    const list = [];
+  async preloadInitialBatch(flavorKey) {
     const folder = FLAVORS[flavorKey].folder;
-    let loaded = 0;
+    const promises = [];
 
-    return new Promise((resolve) => {
-      for (let i = 0; i < TOTAL_FRAMES; i++) {
-        const img = new Image();
-        const frameNum = String(i).padStart(3, '0');
-        img.src = `${folder}/frame_${frameNum}.webp`;
-
-        img.onload = () => {
-          loaded++;
-          if (onProgress) onProgress(loaded / TOTAL_FRAMES);
-          if (loaded === TOTAL_FRAMES) {
-            this.framesCache[flavorKey] = list;
-            resolve(list);
+    for (let i = 0; i < INITIAL_PRELOAD_COUNT; i++) {
+      promises.push(
+        this.loadSingleFrame(folder, i).then((drawable) => {
+          this.framesCache[flavorKey][i] = drawable;
+          if (this.preloadBar) {
+            const p = (i + 1) / INITIAL_PRELOAD_COUNT;
+            this.preloadBar.style.width = `${p * 100}%`;
           }
-        };
+        })
+      );
+    }
 
-        img.onerror = () => {
-          loaded++;
-          if (loaded === TOTAL_FRAMES) {
-            this.framesCache[flavorKey] = list;
-            resolve(list);
-          }
-        };
-
-        list[i] = img;
-      }
-    });
+    await Promise.all(promises);
+    if (this.preloadText) this.preloadText.textContent = 'READY';
   }
 
-  async preloadRemainingFlavors() {
+  async loadRemainingFrames(flavorKey) {
+    const folder = FLAVORS[flavorKey].folder;
+    for (let i = INITIAL_PRELOAD_COUNT; i < TOTAL_FRAMES; i++) {
+      if (!this.framesCache[flavorKey][i]) {
+        const drawable = await this.loadSingleFrame(folder, i);
+        this.framesCache[flavorKey][i] = drawable;
+      }
+    }
+  }
+
+  async preloadSecondaryFlavors() {
     const others = ['chikku', 'jackfruit', 'banana'];
-    for (const flavor of others) {
-      await this.preloadFlavorFrames(flavor);
+    for (const key of others) {
+      const folder = FLAVORS[key].folder;
+      for (let i = 0; i < TOTAL_FRAMES; i += 2) {
+        // Progressive interleaved preload
+        if (!this.framesCache[key][i]) {
+          const drawable = await this.loadSingleFrame(folder, i);
+          this.framesCache[key][i] = drawable;
+        }
+      }
     }
   }
 
   bindEvents() {
-    window.addEventListener('resize', () => {
+    const onResize = () => {
       this.setupCanvas();
-      this.requestRender();
-    });
+    };
+
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('orientationchange', onResize, { passive: true });
 
     // Scroll mapping
     window.addEventListener('scroll', () => {
       this.handleScroll();
     }, { passive: true });
 
-    // Flavor switcher clicks
+    // Flavor switcher
     document.querySelectorAll('.flavor-tab').forEach((tab) => {
       tab.addEventListener('click', (e) => {
         const flavor = e.currentTarget.dataset.flavor;
@@ -202,7 +259,7 @@ class ScrollytellingEngine {
       });
     }
 
-    // Card Add Buttons
+    // Product Add to Bag
     document.addEventListener('click', (e) => {
       if (e.target && e.target.classList.contains('card-add-btn')) {
         const id = e.target.dataset.id;
@@ -214,7 +271,7 @@ class ScrollytellingEngine {
   handleScroll() {
     const scrollY = window.scrollY;
 
-    // 1. Apple Navbar glassmorphism threshold
+    // 1. Apple Navbar glassmorphism
     if (this.navbar) {
       if (scrollY > 60) {
         this.navbar.classList.add('scrolled');
@@ -227,22 +284,101 @@ class ScrollytellingEngine {
     if (!this.wrapper) return;
     const rect = this.wrapper.getBoundingClientRect();
     const totalScroll = this.wrapper.offsetHeight - window.innerHeight;
+    if (totalScroll <= 0) return;
+
     const currentScroll = Math.max(0, -rect.top);
     const progress = Math.min(Math.max(currentScroll / totalScroll, 0), 1);
 
     // Map progress to frame index (0..119)
-    this.targetFrame = Math.min(Math.floor(progress * TOTAL_FRAMES), TOTAL_FRAMES - 1);
-    this.requestRender();
+    this.targetFrame = Math.min(Math.floor(progress * (TOTAL_FRAMES - 1)), TOTAL_FRAMES - 1);
 
-    // 3. Update Story Beats based on exact prompt specifications
-    // 0–15% Hero
-    // 15–40% Inside the pack
-    // 40–65% The fruit
-    // 65–85% The crunch
-    // 85–100% Reassembly + CTA
+    if (!this.isTicking) {
+      this.isTicking = true;
+      requestAnimationFrame(() => this.tick());
+    }
+
+    // 3. Update Story Beats (Clean floating panels without moving the canvas)
     this.updateStoryBeats(progress);
   }
 
+  tick() {
+    // Zero-jitter lerp smoothing
+    const diff = this.targetFrame - this.currentFrame;
+    if (Math.abs(diff) < 0.05) {
+      this.currentFrame = this.targetFrame;
+    } else {
+      this.currentFrame += diff * 0.22;
+    }
+
+    const frameToDraw = Math.round(this.currentFrame);
+    if (frameToDraw !== this.lastDrawnFrame) {
+      this.drawFrame(frameToDraw);
+    }
+
+    if (Math.abs(this.targetFrame - this.currentFrame) >= 0.05) {
+      requestAnimationFrame(() => this.tick());
+    } else {
+      this.isTicking = false;
+    }
+  }
+
+  /**
+   * STEP 2: Whole-Pixel Integer Contain Math
+   * Eliminates fractional subpixel blur across canvas edges
+   */
+  drawFrame(frameIndex) {
+    if (!this.ctx || !this.canvas) return;
+
+    const cssWidth = window.innerWidth;
+    const cssHeight = window.innerHeight;
+
+    let drawable = this.framesCache[this.activeFlavor][frameIndex];
+
+    // If frame is still loading, fallback to closest loaded frame to avoid flicker
+    if (!drawable) {
+      for (let offset = 1; offset < 10; offset++) {
+        if (this.framesCache[this.activeFlavor][frameIndex - offset]) {
+          drawable = this.framesCache[this.activeFlavor][frameIndex - offset];
+          break;
+        }
+        if (this.framesCache[this.activeFlavor][frameIndex + offset]) {
+          drawable = this.framesCache[this.activeFlavor][frameIndex + offset];
+          break;
+        }
+      }
+    }
+
+    if (!drawable) return;
+
+    const naturalWidth = drawable.width || 1280;
+    const naturalHeight = drawable.height || 720;
+    const imgRatio = naturalWidth / naturalHeight;
+    const canvasRatio = cssWidth / cssHeight;
+
+    let drawW, drawH;
+    if (canvasRatio > imgRatio) {
+      drawH = cssHeight;
+      drawW = Math.round(cssHeight * imgRatio);
+    } else {
+      drawW = cssWidth;
+      drawH = Math.round(cssWidth / imgRatio);
+    }
+
+    // Integer whole-pixel positions to prevent soft subpixel edges
+    const drawX = Math.round((cssWidth - drawW) / 2);
+    const drawY = Math.round((cssHeight - drawH) / 2);
+
+    this.ctx.clearRect(0, 0, cssWidth, cssHeight);
+    this.ctx.drawImage(drawable, drawX, drawY, drawW, drawH);
+
+    this.lastDrawnFrame = frameIndex;
+  }
+
+  /**
+   * UX FIX: Rock-Solid Centered Product Stage
+   * No horizontal ping-pong or zigzag drifting.
+   * Product stays centered; story beats transition in around it.
+   */
   updateStoryBeats(p) {
     const setActive = (el, active) => {
       if (!el) return;
@@ -258,31 +394,11 @@ class ScrollytellingEngine {
     setActive(this.beatFruit, p >= 0.40 && p < 0.65);
     setActive(this.beatCrunch, p >= 0.65 && p < 0.85);
     setActive(this.beatCta, p >= 0.85);
-
-    // Dynamic responsive 3D camera drift & focal scale
-    if (this.canvas) {
-      if (window.innerWidth > 900) {
-        if (p < 0.15) {
-          this.canvas.style.transform = 'translate(-50%, -38%) scale(1.08)';
-        } else if (p >= 0.15 && p < 0.40) {
-          this.canvas.style.transform = 'translate(calc(-50% + 14vw), -48%) scale(1.18)';
-        } else if (p >= 0.40 && p < 0.65) {
-          this.canvas.style.transform = 'translate(calc(-50% - 14vw), -48%) scale(1.20)';
-        } else if (p >= 0.65 && p < 0.85) {
-          this.canvas.style.transform = 'translate(calc(-50% + 13vw), -48%) scale(1.22)';
-        } else {
-          this.canvas.style.transform = 'translate(-50%, -48%) scale(1.12)';
-        }
-      } else {
-        this.canvas.style.transform = 'translate(-50%, -45%) scale(1.02)';
-      }
-    }
   }
 
-  switchFlavor(flavorKey) {
+  async switchFlavor(flavorKey) {
     if (!FLAVORS[flavorKey] || flavorKey === this.activeFlavor) return;
 
-    this.previousFlavor = this.activeFlavor;
     this.activeFlavor = flavorKey;
     document.documentElement.dataset.activeFlavor = flavorKey;
 
@@ -297,66 +413,19 @@ class ScrollytellingEngine {
       heroSubEl.textContent = FLAVORS[flavorKey].heroSub;
     }
 
-    this.requestRender();
-  }
-
-  requestRender() {
-    if (!this.isRendering) {
-      this.isRendering = true;
-      requestAnimationFrame(() => this.render());
-    }
-  }
-
-  render() {
-    if (!this.ctx || !this.canvas) {
-      this.isRendering = false;
-      return;
-    }
-
-    // Lerp frame smoothing
-    const diff = this.targetFrame - this.currentFrame;
-    if (Math.abs(diff) < 0.05) {
-      this.currentFrame = this.targetFrame;
-    } else {
-      this.currentFrame += diff * 0.18;
-    }
-
+    // Ensure current frame is loaded for new flavor
     const frameIdx = Math.round(this.currentFrame);
-    const activeList = this.framesCache[this.activeFlavor];
-    const img = activeList && activeList[frameIdx];
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = this.canvas.width / dpr;
-    const height = this.canvas.height / dpr;
-
-    this.ctx.clearRect(0, 0, width, height);
-
-    if (img && img.complete && img.naturalWidth > 0) {
-      // Calculate aspect ratio fit (contain)
-      const imgRatio = img.naturalWidth / img.naturalHeight;
-      const canvasRatio = width / height;
-
-      let drawW, drawH;
-      if (canvasRatio > imgRatio) {
-        drawH = height;
-        drawW = height * imgRatio;
-      } else {
-        drawW = width;
-        drawH = width / imgRatio;
-      }
-
-      const drawX = (width - drawW) / 2;
-      const drawY = (height - drawH) / 2;
-
-      this.ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    if (!this.framesCache[flavorKey][frameIdx]) {
+      const folder = FLAVORS[flavorKey].folder;
+      const drawable = await this.loadSingleFrame(folder, frameIdx);
+      this.framesCache[flavorKey][frameIdx] = drawable;
     }
 
-    // Continue render loop if lerp is not finished
-    if (Math.abs(this.targetFrame - this.currentFrame) >= 0.05) {
-      requestAnimationFrame(() => this.render());
-    } else {
-      this.isRendering = false;
-    }
+    this.lastDrawnFrame = -1;
+    this.drawFrame(frameIdx);
+
+    // Preload remaining frames for this newly selected flavor
+    this.loadRemainingFrames(flavorKey);
   }
 
   addToCart(flavorId) {
