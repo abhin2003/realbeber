@@ -1,221 +1,422 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-active-flavor="mango">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>REALBEBER — Museum-Grade 3D Fruit Dimension</title>
-  <meta name="description" content="An interactive 3D digital art installation for REALBEBER, futuristic luxury freeze-dried fruit chips from Kerala. Real Fruit. Remarkable Crunch.">
+  <title>Realbeber — Real fruit. Nothing else. | Freeze-Dried Fruit Chips</title>
+  <meta name="description" content="Cinematic Apple-level scrollytelling experience for Realbeber freeze-dried fruit chips from Kerala. 100% pure fruit, zero oil, ethereal crunch.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/logo_dark.png">
 
-  <!-- Google Fonts: Syne (Brutalist Display), Space Grotesk (Editorial Mono), Plus Jakarta Sans -->
+  <!-- Typography: Inter & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Museum-Grade 3D Styles -->
-  <link rel="stylesheet" href="css/museum-style.css">
+  <!-- Apple-Grade Scrollytelling Styles -->
+  <link rel="stylesheet" href="css/scrollytelling.css">
 </head>
 <body>
 
-  <!-- 1. Master Fixed 3D WebGL Canvas -->
-  <div id="webgl-canvas-container" aria-hidden="true"></div>
-
-  <!-- 2. Floating Minimal HUD Navigation -->
-  <header class="floating-hud-header" role="banner">
-    <div class="hud-left-group">
-      <button class="hud-hamburger-btn" id="menu-toggle" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <a href="#" class="hud-brand-logo">REALBEBER</a>
-      <nav class="hud-nav-links" aria-label="Primary">
-        <a href="#section-portal">HOME</a>
-        <a href="#section-mango">MANGO</a>
-        <a href="#section-jackfruit">JACKFRUIT</a>
-        <a href="#section-chikoo">CHIKKU</a>
-        <a href="#section-banana">BANANA</a>
-        <a href="#section-finale">COLLECTION</a>
-      </nav>
+  <!-- Progressive Minimal Preloader -->
+  <div class="preloader" id="preloader" aria-label="Loading experience">
+    <div class="preloader-brand">
+      REALBEBER <span>&amp; CO.</span>
     </div>
+    <div class="preloader-bar-wrap">
+      <div class="preloader-bar-fill" id="preload-bar-fill"></div>
+    </div>
+    <div class="preloader-status" id="preload-status-text">INITIALIZING CINEMATIC ENGINE...</div>
+  </div>
 
-    <div class="hud-right-actions">
-      <!-- Color Swatches -->
-      <span class="hud-swatch-chip hud-swatch-tangerine">#FF6A2A</span>
-      <span class="hud-swatch-chip hud-swatch-lavender">Soft Lavender</span>
-      <span class="hud-swatch-chip hud-swatch-sand">Pale Sand</span>
+  <!-- Apple-Style Slim Glassmorphism Navbar -->
+  <header class="apple-navbar" id="apple-navbar" role="banner">
+    <a href="#" class="nav-brand">
+      Realbeber <span class="brand-badge">Kerala</span>
+    </a>
 
-      <!-- Audio Engine Sound Wave Toggle -->
-      <button class="hud-icon-btn" id="audio-toggle" aria-label="Toggle dimensional ambient soundscape" title="Toggle Sound">
-        <div class="audio-equalizer">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-      </button>
+    <nav aria-label="Primary Navigation">
+      <ul class="nav-links">
+        <li><a href="#scrollytelling-section">Overview</a></li>
+        <li><a href="#flavors">Flavors</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#nutrition">Nutrition</a></li>
+        <li><a href="#flavors">Buy</a></li>
+      </ul>
+    </nav>
 
-      <!-- Search Trigger -->
-      <button class="hud-icon-btn" id="search-btn" aria-label="Search collection">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="m21 21-4.3-4.3"/>
-        </svg>
-      </button>
-
-      <!-- Cart Trigger -->
-      <button class="hud-icon-btn" id="cart-btn" aria-label="View shopping bag">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <div class="nav-actions">
+      <button class="bag-btn" id="bag-btn" aria-label="Shopping bag">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
           <path d="M3 6h18"/>
           <path d="M16 10a4 4 0 0 1-8 0"/>
         </svg>
-        <span class="cart-badge">0</span>
+        <span class="bag-count" id="bag-count">1</span>
       </button>
+      <a href="#flavors" class="nav-cta">Shop Now</a>
     </div>
   </header>
 
-  <!-- 3. Left Telemetry HUD (Vertical Dimensional Scroll) -->
-  <aside class="telemetry-hud-left" aria-hidden="true">
-    <div class="telemetry-progress-track">
-      <span class="telemetry-arrow">↑</span>
-      <div class="telemetry-line">
-        <span class="telemetry-pip" id="telemetry-pip"></span>
+  <!-- Main Scrollytelling Section (~400vh) -->
+  <main id="main-content">
+    <section class="scrollytelling-wrapper" id="scrollytelling-section" aria-label="Interactive Product Exploded View">
+      <div class="scrollytelling-sticky">
+        
+        <!-- Ambient Soft Radial Glow behind the product -->
+        <div class="ambient-glow" id="ambient-glow" aria-hidden="true"></div>
+
+        <!-- HTML5 Canvas for Hardware-Accelerated 120-Frame Scrubbing -->
+        <canvas class="sequence-canvas" id="scrollytelling-canvas"></canvas>
+
+        <!-- Seamless Dark Vignette blending canvas into #050505 void -->
+        <div class="canvas-vignette" aria-hidden="true"></div>
+
+        <!-- Floating Apple-Grade Flavor Switcher Pill -->
+        <nav class="flavor-switcher-pill" aria-label="Flavor Switcher">
+          <button class="flavor-tab active" data-flavor="mango" aria-label="Switch to Mango flavor">
+            <span class="flavor-dot"></span> Mango
+          </button>
+          <button class="flavor-tab" data-flavor="chikku" aria-label="Switch to Chikku flavor">
+            <span class="flavor-dot"></span> Chikku
+          </button>
+          <button class="flavor-tab" data-flavor="jackfruit" aria-label="Switch to Jackfruit flavor">
+            <span class="flavor-dot"></span> Jackfruit
+          </button>
+          <button class="flavor-tab" data-flavor="banana" aria-label="Switch to Banana flavor">
+            <span class="flavor-dot"></span> Banana
+          </button>
+        </nav>
+
+        <!-- Synchronized Story Beats Container -->
+        <div class="story-beats-container">
+
+          <!-- Beat 1: 0–15% Hero -->
+          <article class="story-beat beat-hero active" id="beat-hero">
+            <div class="eyebrow-tag">Real fruit. Nothing else.</div>
+            <h1 class="brand-hero-title">Realbeber</h1>
+            <p class="brand-hero-subtitle" id="hero-flavor-subtitle">
+              Freeze-dried at peak ripeness. Crunchy, light, and bursting with flavor.
+            </p>
+            <div class="scroll-indicator-cue">
+              <span>Scroll to explore inside</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14m7-7-7 7-7-7"/>
+              </svg>
+            </div>
+          </article>
+
+          <!-- Beat 2: 15–40% Inside The Pack (Left Aligned) -->
+          <article class="story-beat beat-inside" id="beat-inside">
+            <div class="eyebrow-tag">Multi-Layer Protection</div>
+            <h2 class="beat-title">Sealed for freshness.</h2>
+            <p class="beat-body">
+              A multi-layer barrier locks out air and moisture so every bite tastes like the day it was picked.
+            </p>
+            <div class="specs-chip-row">
+              <span class="spec-chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Zero Oxygen Transfer
+              </span>
+              <span class="spec-chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+                Moisture-Proof Foil
+              </span>
+              <span class="spec-chip">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                Airtight Resealable Zip
+              </span>
+            </div>
+          </article>
+
+          <!-- Beat 3: 40–65% The Fruit (Right Aligned) -->
+          <article class="story-beat beat-fruit" id="beat-fruit">
+            <div class="eyebrow-tag">Pure Botanical Harvest</div>
+            <h2 class="beat-title">One ingredient.<br>Zero compromise.</h2>
+            <p class="beat-body">
+              No added sugar. No preservatives. No artificial colors. Up to 95% of the water removed, 100% of the flavor kept.
+            </p>
+            <div class="specs-chip-row">
+              <span class="spec-chip">100% Single Ingredient</span>
+              <span class="spec-chip">0g Added Sugar</span>
+              <span class="spec-chip">95% Water Extracted</span>
+            </div>
+          </article>
+
+          <!-- Beat 4: 65–85% The Crunch (Centered / Left) -->
+          <article class="story-beat beat-crunch" id="beat-crunch">
+            <div class="eyebrow-tag">Sub-Zero Cryo Crystallization</div>
+            <h2 class="beat-title">Crisp. Light.<br>Unreal.</h2>
+            <p class="beat-body">
+              Freeze-drying keeps the shape, color, and nutrients, then adds a melt-in-your-mouth crunch.
+            </p>
+            <div class="specs-chip-row">
+              <span class="spec-chip">-40°C Flash Frozen</span>
+              <span class="spec-chip">98% Nutrient Integrity</span>
+              <span class="spec-chip">Zero Oil or Frying</span>
+            </div>
+          </article>
+
+          <!-- Beat 5: 85–100% Reassembly + CTA (Centered) -->
+          <article class="story-beat beat-cta" id="beat-cta">
+            <div class="eyebrow-tag">Orchard To Pouch</div>
+            <h2 class="beat-title">Snack real.<br>Feel good.</h2>
+            <p class="beat-body" style="max-width: 540px; margin: 0 auto;">
+              Realbeber freeze-dried fruit, from Kerala's best orchards to your hands.
+            </p>
+            <div class="cta-button-group">
+              <a href="#flavors" class="primary-gradient-btn">Shop Realbeber</a>
+              <a href="#flavors" class="secondary-ghost-btn">See all flavors</a>
+            </div>
+          </article>
+
+        </div>
+
       </div>
-      <span class="telemetry-arrow">↓</span>
+    </section>
+
+    <!-- Section 2: Flavors Collection Showcase -->
+    <section class="editorial-section" id="flavors">
+      <div class="section-header-block">
+        <div class="section-eyebrow">Confirmed Varieties</div>
+        <h2 class="section-title">Pure fruit. Distinctive crunch.</h2>
+        <p class="section-subtitle">
+          Four single-ingredient freeze-dried fruit varieties cultivated in the mineral-rich soils of Kerala.
+        </p>
+      </div>
+
+      <div class="flavor-cards-grid">
+        
+        <!-- 1. Mango -->
+        <article class="flavor-product-card" style="--card-accent: #FFB000;">
+          <div class="card-top-row">
+            <span class="card-tag">Best Seller</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">35g</span>
+          </div>
+          <div class="card-image-wrap">
+            <img src="assets/products/mango_clean_pouch.png" alt="Realbeber Mango Frost Chips" class="card-pouch-img" loading="lazy">
+          </div>
+          <h3 class="card-title">Mango Frost Chips</h3>
+          <p class="card-notes">Sun-ripened Alphonso and local Kerala mangoes. Rich floral honey sweetness with airy golden crunch.</p>
+          <div class="card-bottom-row">
+            <span class="card-price">₹149</span>
+            <button class="card-add-btn" data-id="mango">Add +</button>
+          </div>
+        </article>
+
+        <!-- 2. Chikku -->
+        <article class="flavor-product-card" style="--card-accent: #C68B59;">
+          <div class="card-top-row">
+            <span class="card-tag">New</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">40g</span>
+          </div>
+          <div class="card-image-wrap">
+            <img src="assets/products/chikku_clean_pouch.png" alt="Realbeber Chikku Frost Chips" class="card-pouch-img" loading="lazy">
+          </div>
+          <h3 class="card-title">Chikku Frost Chips</h3>
+          <p class="card-notes">Sapodilla fruit freeze-dried into honeycomb wafers with warm caramel malt and brown sugar fudge notes.</p>
+          <div class="card-bottom-row">
+            <span class="card-price">₹139</span>
+            <button class="card-add-btn" data-id="chikku">Add +</button>
+          </div>
+        </article>
+
+        <!-- 3. Jackfruit -->
+        <article class="flavor-product-card" style="--card-accent: #F5C518;">
+          <div class="card-top-row">
+            <span class="card-tag">Exotic</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">35g</span>
+          </div>
+          <div class="card-image-wrap">
+            <img src="assets/products/jackfruit_clean_pouch.png" alt="Realbeber Jackfruit Frost Chips" class="card-pouch-img" loading="lazy">
+          </div>
+          <h3 class="card-title">Jackfruit Frost Chips</h3>
+          <p class="card-notes">Golden Varikka jackfruit petals from Idukki. Intense aromatic tropical sweetness with crisp brittle texture.</p>
+          <div class="card-bottom-row">
+            <span class="card-price">₹149</span>
+            <button class="card-add-btn" data-id="jackfruit">Add +</button>
+          </div>
+        </article>
+
+        <!-- 4. Banana -->
+        <article class="flavor-product-card" style="--card-accent: #FFE066;">
+          <div class="card-top-row">
+            <span class="card-tag">Classic</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">40g</span>
+          </div>
+          <div class="card-image-wrap">
+            <img src="assets/products/banana_clean_pouch.png" alt="Realbeber Banana Frost Chips" class="card-pouch-img" loading="lazy">
+          </div>
+          <h3 class="card-title">Banana Frost Chips</h3>
+          <p class="card-notes">Kerala banana slices freeze-dried at sub-zero temperatures. Pure natural fruit crunch with zero frying oil.</p>
+          <div class="card-bottom-row">
+            <span class="card-price">₹129</span>
+            <button class="card-add-btn" data-id="banana">Add +</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Section 3: Sublimation Process Technology -->
+    <section class="editorial-section" id="process">
+      <div class="section-header-block">
+        <div class="section-eyebrow">The Science</div>
+        <h2 class="section-title">Sublimation. Ice to vapor.</h2>
+        <p class="section-subtitle">
+          Unlike high-heat frying or dehydrating that destroys vitamins and creates trans fats, freeze-drying preserves 98% of natural cellular nutrition.
+        </p>
+      </div>
+
+      <div class="process-grid">
+        <div class="process-step-card">
+          <div class="step-num">01</div>
+          <h3 class="step-title">Tree-Ripened Harvest</h3>
+          <p class="step-desc">Handpicked at peak sugar maturity from sustainable organic orchards across Kerala.</p>
+        </div>
+        <div class="process-step-card">
+          <div class="step-num">02</div>
+          <h3 class="step-title">-40°C Cryo Freeze</h3>
+          <p class="step-desc">Rapid sub-zero flash freezing immobilizes the fruit's water into microscopic ice crystals.</p>
+        </div>
+        <div class="process-step-card">
+          <div class="step-num">03</div>
+          <h3 class="step-title">Vacuum Sublimation</h3>
+          <p class="step-desc">Under deep vacuum chambers, ice converts directly into vapor without ever melting into water.</p>
+        </div>
+        <div class="process-step-card">
+          <div class="step-num">04</div>
+          <h3 class="step-title">Barrier Nitrogen Seal</h3>
+          <p class="step-desc">Flushed with food-grade nitrogen inside multi-layer light-blocking pouches for 12 months crispness.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Nutrition Comparison -->
+    <section class="editorial-section" id="nutrition">
+      <div class="section-header-block">
+        <div class="section-eyebrow">Pure Nutrition</div>
+        <h2 class="section-title">Clean label transparency.</h2>
+        <p class="section-subtitle">
+          See how Realbeber compares to conventional supermarket fruit chips.
+        </p>
+      </div>
+
+      <div class="nutrition-matrix-wrap">
+        <table class="nutrition-table" aria-label="Nutritional comparison matrix">
+          <thead>
+            <tr>
+              <th>Ingredient &amp; Process Metric</th>
+              <th class="highlight-col">Realbeber Freeze-Dried</th>
+              <th>Vacuum Fried Banana Chips</th>
+              <th>Fruit Gummy Snacks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ingredients</strong></td>
+              <td class="highlight-col">100% Real Fruit</td>
+              <td>Fruit, Palm Oil, Salt</td>
+              <td>High Fructose Syrup, Gelatin, Dye</td>
+            </tr>
+            <tr>
+              <td><strong>Added Sugar</strong></td>
+              <td class="highlight-col">0 grams (Zero)</td>
+              <td>2–5 grams</td>
+              <td>22–30 grams</td>
+            </tr>
+            <tr>
+              <td><strong>Cooking Oil / Fat</strong></td>
+              <td class="highlight-col">0% Oil-Free</td>
+              <td>15%–35% Fried Fat</td>
+              <td>0% Fat (All Sugar)</td>
+            </tr>
+            <tr>
+              <td><strong>Vitamin &amp; Nutrient Retention</strong></td>
+              <td class="highlight-col">98% Intact</td>
+              <td>30%–45% (Heat Degraded)</td>
+              <td>0% Synthetics Only</td>
+            </tr>
+            <tr>
+              <td><strong>Shelf Stability</strong></td>
+              <td class="highlight-col">12 Months (Zero Preservatives)</td>
+              <td>Preservatives &amp; Antioxidants</td>
+              <td>Chemical Preservatives</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 5: Brand Story Overview -->
+    <section class="editorial-section" id="overview">
+      <div class="section-header-block">
+        <div class="section-eyebrow">Our Roots</div>
+        <h2 class="section-title">From God's Own Country.</h2>
+        <p class="section-subtitle">
+          Realbeber &amp; Co. was born out of love for the lush orchards of Kerala. We believe snacks should celebrate the natural purity of wholesome fruit without shortcuts or additives.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Luxury Editorial Footer -->
+  <footer class="luxury-footer" role="contentinfo">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>REALBEBER &amp; CO.</h3>
+        <p>Real fruit. Remarkable crunch. 100% pure freeze-dried fruit chips crafted in Kerala, India.</p>
+      </div>
+      <div>
+        <h4 style="font-size: 0.85rem; color: #fff; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.08em;">Navigation</h4>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
+          <li><a href="#scrollytelling-section" style="color: var(--text-secondary); text-decoration: none;">Overview</a></li>
+          <li><a href="#flavors" style="color: var(--text-secondary); text-decoration: none;">Flavors</a></li>
+          <li><a href="#process" style="color: var(--text-secondary); text-decoration: none;">Process</a></li>
+          <li><a href="#nutrition" style="color: var(--text-secondary); text-decoration: none;">Nutrition</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size: 0.85rem; color: #fff; text-transform: uppercase; margin-bottom: 0.75rem; letter-spacing: 0.08em;">Flavors</h4>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+          <li>Alphonso Mango</li>
+          <li>Kerala Chikku</li>
+          <li>Varikka Jackfruit</li>
+          <li>Sun-Ripened Banana</li>
+        </ul>
+      </div>
     </div>
-    <div class="telemetry-labels" id="telemetry-colors">
-      <span class="telemetry-color-pill">PALE SAND7</span>
-      <span class="telemetry-color-pill">Soft Lavender</span>
-      <span class="telemetry-color-pill">#243D9B</span>
+    <div class="footer-bottom">
+      <div>&copy; 2026 Realbeber &amp; Co. All rights reserved.</div>
+      <div>Designed with Apple-grade Scrollytelling Architecture.</div>
+    </div>
+  </footer>
+
+  <!-- Shopping Bag Modal / Sliding Drawer -->
+  <aside class="bag-drawer-overlay" id="bag-drawer-overlay" role="dialog" aria-modal="true" aria-label="Shopping Bag">
+    <div class="bag-drawer">
+      <div class="drawer-header">
+        <h2 class="drawer-title">YOUR BAG</h2>
+        <button class="drawer-close" id="drawer-close" aria-label="Close bag">&times;</button>
+      </div>
+      <div class="drawer-items-list" id="drawer-items-list">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="drawer-footer">
+        <div class="drawer-total-row">
+          <span>Subtotal</span>
+          <span id="drawer-total-price">₹149</span>
+        </div>
+        <button class="drawer-checkout-btn" onclick="alert('Proceeding to Apple Pay / UPI Checkout!')">
+          CHECKOUT NOW &rarr;
+        </button>
+      </div>
     </div>
   </aside>
 
-  <!-- 4. Bottom Center Telemetry Pill -->
-  <div class="telemetry-bottom-center">
-    <button class="scroll-explore-pill interactive-element" id="scroll-explore-pill">
-      <div class="arrow-circle">⌃</div>
-      <span>SCROLL TO EXPLORE</span>
-      <div class="arrow-circle">↓</div>
-    </button>
-  </div>
-
-  <!-- 5. Bottom Right Floating Action Pill -->
-  <button class="floating-chat-pill interactive-element" id="quick-action-pill" aria-label="Quick Action">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-  </button>
-
-  <!-- 6. Scroll Container & Choreographed Dimensional Worlds -->
-  <main id="scroll-container">
-
-    <!-- Section 1: The Portal Opening (0% - 20%) -->
-    <section class="editorial-section" id="section-portal" aria-label="Portal Opening">
-      <div class="sticky-viewport-panel">
-        <h1 class="portal-headline">
-          WELCOME TO THE<br>FRUIT DIMENSION
-        </h1>
-        <a href="#section-mango" class="portal-side-link interactive-element">VIEW MORE &gt;</a>
-      </div>
-    </section>
-
-    <!-- Section 2: The Mango World (20% - 45%) -->
-    <section class="editorial-section" id="section-mango" aria-label="The Mango World">
-      <div class="sticky-viewport-panel">
-        <div class="world-header-center">THE MANGO WORLD</div>
-        <div class="mango-content-block">
-          <span class="acid-pill-badge">#DDF05B</span>
-          <h2 class="oversized-block-title">
-            ONE FRUIT.<br>
-            A WHOLE<br>
-            NEW<br>
-            WORLD.
-          </h2>
-          <span class="cobalt-pill-badge">DEEP COBALT</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 3: The Jackfruit World (45% - 65%) -->
-    <section class="editorial-section" id="section-jackfruit" aria-label="The Jackfruit World">
-      <div class="sticky-viewport-panel">
-        <div class="jackfruit-content-block">
-          <span class="dark-code-tag">#171719</span>
-          <h2 class="jackfruit-title">
-            THE<br>
-            JACKFRUIT<br>
-            WORLD
-          </h2>
-          <div class="jackfruit-swatches-row">
-            <span class="acid-pill-badge">#DDF05B</span>
-            <span class="hud-swatch-chip hud-swatch-lavender">#C7B8F0</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 4: The Chikoo World (65% - 82%) -->
-    <section class="editorial-section" id="section-chikoo" aria-label="The Chikoo World">
-      <div class="sticky-viewport-panel">
-        <div class="chikoo-content-block">
-          <h2 class="chikoo-title">
-            THE<br>
-            CHIKOO<br>
-            WORLD
-          </h2>
-          <span class="tangerine-pill-badge">#FF6A2A</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 5: The Banana World (82% - 92%) -->
-    <section class="editorial-section" id="section-banana" aria-label="The Banana World">
-      <div class="sticky-viewport-panel">
-        <div class="banana-content-block">
-          <h2 class="banana-title">
-            THE<br>
-            BANANA<br>
-            WORLD
-          </h2>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 6: The Finale — Realbeber Taste The Future (92% - 100%) -->
-    <section class="editorial-section" id="section-finale" aria-label="Realbeber Collection Finale">
-      <div class="sticky-viewport-panel">
-        <div class="finale-content-block">
-          <h2 class="finale-headline">
-            <span class="highlight-tangerine">REALBEBER.</span><br>
-            TASTE THE FUTURE.
-          </h2>
-          <button class="glass-explore-btn interactive-element" id="explore-collection-btn">
-            EXPLORE THE COLLECTION
-          </button>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- 7. Collection Modal / Sliding Side Drawer -->
-  <div class="collection-drawer-overlay" id="collection-drawer-overlay" role="dialog" aria-modal="true" aria-label="Product Collection">
-    <div class="collection-drawer">
-      <div class="drawer-header">
-        <h2 class="drawer-title">REALBEBER COLLECTION</h2>
-        <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Close drawer">&times;</button>
-      </div>
-      <div class="drawer-products-grid" id="drawer-products-list">
-        <!-- Rendered dynamically by main-app.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Scripts -->
-  <script type="module" src="js/webgl-experience.js"></script>
-  <script type="module" src="js/main-app.js"></script>
+  <!-- Scrollytelling Engine -->
+  <script type="module" src="js/scrollytelling-engine.js"></script>
 
 </body>
 </html>
