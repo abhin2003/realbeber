@@ -1,8 +1,11 @@
 /**
- * REALBEBER & CO. — PERFORMANCE-FOCUSED SCROLLYTELLING ENGINE
- * High-DPI Retina Backing Store, Whole-Pixel Math, Zero-Jitter Lerp,
- * createImageBitmap Asynchronous Decoding, and Grounded Center Stage UX.
+ * REALBEBER & CO. — AWWWARDS-GRADE SCROLLYTELLING ENGINE
+ * Smooth Lenis Inertia Scroll, 3D Parallax Tilt, High-DPI Canvas Backing Store,
+ * Whole-Pixel Contain Math, Web Audio Micro-Interactions, and Zero-Lag Scrubbing.
  */
+
+import Lenis from 'lenis';
+import { audioEngine } from './audio-engine.js';
 
 export const FLAVORS = {
   mango: {
@@ -11,7 +14,7 @@ export const FLAVORS = {
     tagline: 'Sun-ripened Alphonso notes',
     accentStart: '#FFB000',
     accentEnd: '#FF6A00',
-    glow: 'rgba(255, 120, 0, 0.16)',
+    glow: 'rgba(255, 120, 0, 0.18)',
     folder: 'sequences/mango',
     heroSub: 'Freeze-dried at peak ripeness. Crunchy, light, and bursting with tropical honey sweetness.'
   },
@@ -21,7 +24,7 @@ export const FLAVORS = {
     tagline: 'Caramel malt fudge sweetness',
     accentStart: '#C68B59',
     accentEnd: '#8B5A2B',
-    glow: 'rgba(198, 139, 89, 0.18)',
+    glow: 'rgba(198, 139, 89, 0.20)',
     folder: 'sequences/chikku',
     heroSub: 'Velvety Kerala sapodilla freeze-dried into honeycomb wafers with rich caramel notes.'
   },
@@ -31,7 +34,7 @@ export const FLAVORS = {
     tagline: 'Sweet tropical golden petals',
     accentStart: '#F5C518',
     accentEnd: '#E3A008',
-    glow: 'rgba(245, 197, 24, 0.16)',
+    glow: 'rgba(245, 197, 24, 0.18)',
     folder: 'sequences/jackfruit',
     heroSub: 'Pure Varikka jackfruit freeze-dried to crisp perfection with intense aromatic aroma.'
   },
@@ -41,14 +44,14 @@ export const FLAVORS = {
     tagline: 'Crisp natural crunch, pure Kerala',
     accentStart: '#FFE066',
     accentEnd: '#F7C948',
-    glow: 'rgba(255, 224, 102, 0.14)',
+    glow: 'rgba(255, 224, 102, 0.16)',
     folder: 'sequences/banana',
     heroSub: 'Delicate sun-ripened Kerala banana slices, airy crunch with zero oil or sugar added.'
   }
 };
 
 const TOTAL_FRAMES = 120;
-const INITIAL_PRELOAD_COUNT = 20;
+const INITIAL_PRELOAD_COUNT = 24;
 
 class ScrollytellingEngine {
   constructor() {
@@ -65,14 +68,22 @@ class ScrollytellingEngine {
     this.lastDrawnFrame = -1;
     this.isTicking = false;
 
+    // Mouse Parallax values
+    this.mouseTargetX = 0;
+    this.mouseTargetY = 0;
+    this.mouseCurrentX = 0;
+    this.mouseCurrentY = 0;
+
     // DOM Elements
     this.canvas = document.getElementById('scrollytelling-canvas');
     this.ctx = this.canvas ? this.canvas.getContext('2d', { alpha: true, desynchronized: true }) : null;
+    this.stage = document.getElementById('canvas-stage');
     this.wrapper = document.getElementById('scrollytelling-section');
     this.navbar = document.getElementById('apple-navbar');
     this.preloader = document.getElementById('preloader');
     this.preloadBar = document.getElementById('preload-bar-fill');
     this.preloadText = document.getElementById('preload-status-text');
+    this.soundToggle = document.getElementById('sound-toggle-btn');
 
     // Story Beats
     this.beatHero = document.getElementById('beat-hero');
@@ -81,12 +92,39 @@ class ScrollytellingEngine {
     this.beatCrunch = document.getElementById('beat-crunch');
     this.beatCta = document.getElementById('beat-cta');
 
-    // Cart State
+    // Shopping Bag State
     this.cart = [
       { id: 'mango', name: 'Mango Frost Chips', price: 149, qty: 1, img: 'assets/products/mango_clean_pouch.png' }
     ];
 
+    this.initLenis();
     this.init();
+  }
+
+  initLenis() {
+    try {
+      this.lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: 'vertical',
+        gestureOrientation: 'vertical',
+        smoothWheel: true,
+        wheelMultiplier: 0.95
+      });
+
+      const raf = (time) => {
+        this.lenis.raf(time);
+        requestAnimationFrame(raf);
+      };
+      requestAnimationFrame(raf);
+
+      this.lenis.on('scroll', () => {
+        this.handleScroll();
+      });
+    } catch (e) {
+      console.warn('Lenis fallback to native scroll', e);
+      window.addEventListener('scroll', () => this.handleScroll(), { passive: true });
+    }
   }
 
   async init() {
@@ -94,63 +132,52 @@ class ScrollytellingEngine {
     this.bindEvents();
     this.renderCart();
 
-    // 1. Preload initial 20 frames immediately for instant interactive start
+    // Preload initial frames for instant responsiveness
     await this.preloadInitialBatch('mango');
 
-    // Dismiss preloader as soon as the first interactive frames are ready
+    // Dismiss preloader
     if (this.preloader) {
       this.preloader.classList.add('loaded');
     }
 
-    // Force immediate first frame render
+    // Force first frame render
     this.drawFrame(0);
 
-    // 2. Load remaining frames progressively in background
+    // Preload remaining frames in background
     this.loadRemainingFrames('mango');
 
-    // 3. Background-preload secondary flavors
+    // Background load secondary flavors
     setTimeout(() => {
       this.preloadSecondaryFlavors();
-    }, 1500);
+    }, 1200);
+
+    // Start subtle parallax ticker loop
+    this.startParallaxLoop();
   }
 
-  /**
-   * STEP 2: Strict High-DPI Canvas Backing Store
-   * Matches backing store exactly to CSS size * DPR (capped at 2 for performance)
-   * Resets transform matrix and sets high-quality image smoothing
-   */
   setupCanvas() {
     if (!this.canvas || !this.ctx) return;
 
-    // Cap DPR at 2.0 to balance crystal clarity with memory/performance
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const cssWidth = window.innerWidth;
     const cssHeight = window.innerHeight;
 
-    // Set backing store dimensions
     this.canvas.width = Math.round(cssWidth * dpr);
     this.canvas.height = Math.round(cssHeight * dpr);
 
-    // Keep CSS dimensions strictly matching viewport
     this.canvas.style.width = `${cssWidth}px`;
     this.canvas.style.height = `${cssHeight}px`;
 
-    // Reset transform matrix and scale for DPR
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.scale(dpr, dpr);
 
-    // Enable high-quality texture smoothing
     this.ctx.imageSmoothingEnabled = true;
     this.ctx.imageSmoothingQuality = 'high';
 
-    // Immediate redraw on resize to prevent blur
     this.lastDrawnFrame = -1;
     this.drawFrame(Math.round(this.currentFrame));
   }
 
-  /**
-   * STEP 4: Asynchronous Bitmap Decoding with createImageBitmap & decode()
-   */
   async loadSingleFrame(folder, index) {
     const frameNum = String(index).padStart(3, '0');
     const src = `${folder}/frame_${frameNum}.webp`;
@@ -167,7 +194,6 @@ class ScrollytellingEngine {
         return img;
       }
     } catch {
-      // Fallback for standard Image loader
       return new Promise((resolve) => {
         const img = new Image();
         img.src = src;
@@ -212,7 +238,6 @@ class ScrollytellingEngine {
     for (const key of others) {
       const folder = FLAVORS[key].folder;
       for (let i = 0; i < TOTAL_FRAMES; i += 2) {
-        // Progressive interleaved preload
         if (!this.framesCache[key][i]) {
           const drawable = await this.loadSingleFrame(folder, i);
           this.framesCache[key][i] = drawable;
@@ -229,14 +254,26 @@ class ScrollytellingEngine {
     window.addEventListener('resize', onResize, { passive: true });
     window.addEventListener('orientationchange', onResize, { passive: true });
 
-    // Scroll mapping
-    window.addEventListener('scroll', () => {
-      this.handleScroll();
+    // Interactive 3D mouse parallax tracking
+    window.addEventListener('mousemove', (e) => {
+      const normX = (e.clientX / window.innerWidth) * 2 - 1;
+      const normY = (e.clientY / window.innerHeight) * 2 - 1;
+      this.mouseTargetX = normX * 1.8; // Max tilt degrees
+      this.mouseTargetY = normY * -1.8;
     }, { passive: true });
+
+    // Sound toggle
+    if (this.soundToggle) {
+      this.soundToggle.addEventListener('click', () => {
+        const isPlaying = audioEngine.toggle();
+        this.soundToggle.classList.toggle('sound-active', isPlaying);
+      });
+    }
 
     // Flavor switcher
     document.querySelectorAll('.flavor-tab').forEach((tab) => {
       tab.addEventListener('click', (e) => {
+        audioEngine.playClick();
         const flavor = e.currentTarget.dataset.flavor;
         this.switchFlavor(flavor);
       });
@@ -248,10 +285,16 @@ class ScrollytellingEngine {
     const drawerClose = document.getElementById('drawer-close');
 
     if (bagBtn && drawerOverlay) {
-      bagBtn.addEventListener('click', () => drawerOverlay.classList.add('open'));
+      bagBtn.addEventListener('click', () => {
+        audioEngine.playClick();
+        drawerOverlay.classList.add('open');
+      });
     }
     if (drawerClose && drawerOverlay) {
-      drawerClose.addEventListener('click', () => drawerOverlay.classList.remove('open'));
+      drawerClose.addEventListener('click', () => {
+        audioEngine.playClick();
+        drawerOverlay.classList.remove('open');
+      });
     }
     if (drawerOverlay) {
       drawerOverlay.addEventListener('click', (e) => {
@@ -262,25 +305,40 @@ class ScrollytellingEngine {
     // Product Add to Bag
     document.addEventListener('click', (e) => {
       if (e.target && e.target.classList.contains('card-add-btn')) {
+        audioEngine.playClick();
         const id = e.target.dataset.id;
         this.addToCart(id);
       }
     });
   }
 
+  startParallaxLoop() {
+    const update = () => {
+      this.mouseCurrentX += (this.mouseTargetX - this.mouseCurrentX) * 0.08;
+      this.mouseCurrentY += (this.mouseTargetY - this.mouseCurrentY) * 0.08;
+
+      if (this.stage) {
+        this.stage.style.transform = `perspective(1000px) rotateY(${this.mouseCurrentX}deg) rotateX(${this.mouseCurrentY}deg)`;
+      }
+
+      requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }
+
   handleScroll() {
     const scrollY = window.scrollY;
 
-    // 1. Apple Navbar glassmorphism
+    // Navbar glassmorphism
     if (this.navbar) {
-      if (scrollY > 60) {
+      if (scrollY > 50) {
         this.navbar.classList.add('scrolled');
       } else {
         this.navbar.classList.remove('scrolled');
       }
     }
 
-    // 2. Scrollytelling Section Progress (0.0 to 1.0)
+    // Scrollytelling Section Progress (0.0 to 1.0)
     if (!this.wrapper) return;
     const rect = this.wrapper.getBoundingClientRect();
     const totalScroll = this.wrapper.offsetHeight - window.innerHeight;
@@ -297,12 +355,11 @@ class ScrollytellingEngine {
       requestAnimationFrame(() => this.tick());
     }
 
-    // 3. Update Story Beats (Clean floating panels without moving the canvas)
+    // Synchronize Story Beats (Pure floating editorial typography)
     this.updateStoryBeats(progress);
   }
 
   tick() {
-    // Zero-jitter lerp smoothing
     const diff = this.targetFrame - this.currentFrame;
     if (Math.abs(diff) < 0.05) {
       this.currentFrame = this.targetFrame;
@@ -323,8 +380,8 @@ class ScrollytellingEngine {
   }
 
   /**
-   * STEP 2: Whole-Pixel Integer Contain Math
-   * Eliminates fractional subpixel blur across canvas edges
+   * Whole-Pixel Integer Contain Math
+   * Rock-Solid Centered Product Hero Stage
    */
   drawFrame(frameIndex) {
     if (!this.ctx || !this.canvas) return;
@@ -334,7 +391,6 @@ class ScrollytellingEngine {
 
     let drawable = this.framesCache[this.activeFlavor][frameIndex];
 
-    // If frame is still loading, fallback to closest loaded frame to avoid flicker
     if (!drawable) {
       for (let offset = 1; offset < 10; offset++) {
         if (this.framesCache[this.activeFlavor][frameIndex - offset]) {
@@ -374,11 +430,6 @@ class ScrollytellingEngine {
     this.lastDrawnFrame = frameIndex;
   }
 
-  /**
-   * UX FIX: Rock-Solid Centered Product Stage
-   * No horizontal ping-pong or zigzag drifting.
-   * Product stays centered; story beats transition in around it.
-   */
   updateStoryBeats(p) {
     const setActive = (el, active) => {
       if (!el) return;
@@ -402,18 +453,15 @@ class ScrollytellingEngine {
     this.activeFlavor = flavorKey;
     document.documentElement.dataset.activeFlavor = flavorKey;
 
-    // Update active tab UI
     document.querySelectorAll('.flavor-tab').forEach((tab) => {
       tab.classList.toggle('active', tab.dataset.flavor === flavorKey);
     });
 
-    // Update hero subtitle flavor copy
     const heroSubEl = document.getElementById('hero-flavor-subtitle');
     if (heroSubEl) {
       heroSubEl.textContent = FLAVORS[flavorKey].heroSub;
     }
 
-    // Ensure current frame is loaded for new flavor
     const frameIdx = Math.round(this.currentFrame);
     if (!this.framesCache[flavorKey][frameIdx]) {
       const folder = FLAVORS[flavorKey].folder;
@@ -424,7 +472,6 @@ class ScrollytellingEngine {
     this.lastDrawnFrame = -1;
     this.drawFrame(frameIdx);
 
-    // Preload remaining frames for this newly selected flavor
     this.loadRemainingFrames(flavorKey);
   }
 

@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Realbeber — Real fruit. Nothing else. | Freeze-Dried Fruit Chips</title>
-  <meta name="description" content="Cinematic Apple-level scrollytelling experience for Realbeber freeze-dried fruit chips from Kerala. 100% pure fruit, zero oil, ethereal crunch.">
+  <meta name="description" content="An Apple-grade cinematic scrollytelling experience for Realbeber freeze-dried fruit chips from Kerala. 100% pure fruit, zero oil, ethereal crunch.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/logo_dark.png">
 
-  <!-- Typography: Inter & Plus Jakarta Sans -->
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- Apple-Grade Scrollytelling Styles -->
   <link rel="stylesheet" href="css/scrollytelling.css">
@@ -47,6 +47,16 @@
     </nav>
 
     <div class="nav-actions">
+      <!-- Soundscape Toggle -->
+      <button class="sound-toggle-btn" id="sound-toggle-btn" aria-label="Toggle ambient soundscape" title="Toggle Sound">
+        <div class="sound-bars">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+
+      <!-- Shopping Bag -->
       <button class="bag-btn" id="bag-btn" aria-label="Shopping bag">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
@@ -55,118 +65,172 @@
         </svg>
         <span class="bag-count" id="bag-count">1</span>
       </button>
+
       <a href="#flavors" class="nav-cta">Shop Now</a>
     </div>
   </header>
+
+  <!-- Floating Apple-Grade Studio Flavor Switcher (Docked Sub-Bar) -->
+  <nav class="flavor-switcher-hud" id="flavor-switcher-hud" aria-label="Flavor Switcher">
+    <div class="flavor-hud-label">FLAVOR :</div>
+    <div class="flavor-tabs-group">
+      <button class="flavor-tab active" data-flavor="mango" aria-label="Switch to Mango flavor">
+        <span class="flavor-dot" style="--dot-color: #FFB000;"></span>
+        <span class="flavor-name">Mango</span>
+      </button>
+      <button class="flavor-tab" data-flavor="chikku" aria-label="Switch to Chikku flavor">
+        <span class="flavor-dot" style="--dot-color: #C68B59;"></span>
+        <span class="flavor-name">Chikku</span>
+      </button>
+      <button class="flavor-tab" data-flavor="jackfruit" aria-label="Switch to Jackfruit flavor">
+        <span class="flavor-dot" style="--dot-color: #F5C518;"></span>
+        <span class="flavor-name">Jackfruit</span>
+      </button>
+      <button class="flavor-tab" data-flavor="banana" aria-label="Switch to Banana flavor">
+        <span class="flavor-dot" style="--dot-color: #FFE066;"></span>
+        <span class="flavor-name">Banana</span>
+      </button>
+    </div>
+  </nav>
 
   <!-- Main Scrollytelling Section (~400vh) -->
   <main id="main-content">
     <section class="scrollytelling-wrapper" id="scrollytelling-section" aria-label="Interactive Product Exploded View">
       <div class="scrollytelling-sticky">
         
-        <!-- Ambient Soft Radial Glow behind the product -->
+        <!-- Ambient Volumetric Radial Glow behind product -->
         <div class="ambient-glow" id="ambient-glow" aria-hidden="true"></div>
 
-        <!-- HTML5 Canvas for Hardware-Accelerated 120-Frame Scrubbing -->
-        <canvas class="sequence-canvas" id="scrollytelling-canvas"></canvas>
+        <!-- 3D Perspective Stage Container for Subtle Mouse Parallax -->
+        <div class="canvas-stage-wrapper" id="canvas-stage">
+          <!-- HTML5 Canvas for Hardware-Accelerated 120-Frame Scrubbing -->
+          <canvas class="sequence-canvas" id="scrollytelling-canvas"></canvas>
+        </div>
 
-        <!-- Seamless Dark Vignette blending canvas into #050505 void -->
+        <!-- Seamless Dark Vignette blending canvas edges into #020202 void -->
         <div class="canvas-vignette" aria-hidden="true"></div>
 
-        <!-- Floating Apple-Grade Flavor Switcher Pill -->
-        <nav class="flavor-switcher-pill" aria-label="Flavor Switcher">
-          <button class="flavor-tab active" data-flavor="mango" aria-label="Switch to Mango flavor">
-            <span class="flavor-dot"></span> Mango
-          </button>
-          <button class="flavor-tab" data-flavor="chikku" aria-label="Switch to Chikku flavor">
-            <span class="flavor-dot"></span> Chikku
-          </button>
-          <button class="flavor-tab" data-flavor="jackfruit" aria-label="Switch to Jackfruit flavor">
-            <span class="flavor-dot"></span> Jackfruit
-          </button>
-          <button class="flavor-tab" data-flavor="banana" aria-label="Switch to Banana flavor">
-            <span class="flavor-dot"></span> Banana
-          </button>
-        </nav>
-
-        <!-- Synchronized Story Beats Container -->
+        <!-- Synchronized Architectural Story Beats -->
         <div class="story-beats-container">
 
-          <!-- Beat 1: 0–15% Hero -->
+          <!-- Beat 1: 0–15% Hero (Centered Upper Third) -->
           <article class="story-beat beat-hero active" id="beat-hero">
-            <div class="eyebrow-tag">Real fruit. Nothing else.</div>
+            <div class="editorial-tracker">
+              <span class="tracker-dot"></span>
+              <span class="tracker-text">REAL FRUIT. REMARKABLE CRUNCH.</span>
+            </div>
             <h1 class="brand-hero-title">Realbeber</h1>
             <p class="brand-hero-subtitle" id="hero-flavor-subtitle">
               Freeze-dried at peak ripeness. Crunchy, light, and bursting with flavor.
             </p>
             <div class="scroll-indicator-cue">
-              <span>Scroll to explore inside</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14m7-7-7 7-7-7"/>
-              </svg>
+              <span>EXPLORE THE TRANSFORMATION</span>
+              <div class="scroll-chevron-wrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14m7-7-7 7-7-7"/>
+                </svg>
+              </div>
             </div>
           </article>
 
-          <!-- Beat 2: 15–40% Inside The Pack (Left Aligned) -->
+          <!-- Beat 2: 15–40% Inside The Pack (Floating Left Editorial Callouts) -->
           <article class="story-beat beat-inside" id="beat-inside">
-            <div class="eyebrow-tag">Multi-Layer Protection</div>
-            <h2 class="beat-title">Sealed for freshness.</h2>
+            <div class="editorial-tracker">
+              <span class="tracker-mono">01 // PACKAGING ARCHITECTURE</span>
+            </div>
+            <h2 class="beat-title">Sealed for<br>freshness.</h2>
             <p class="beat-body">
               A multi-layer barrier locks out air and moisture so every bite tastes like the day it was picked.
             </p>
-            <div class="specs-chip-row">
-              <span class="spec-chip">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Zero Oxygen Transfer
-              </span>
-              <span class="spec-chip">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
-                Moisture-Proof Foil
-              </span>
-              <span class="spec-chip">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                Airtight Resealable Zip
-              </span>
+            <div class="tech-callout-list">
+              <div class="tech-callout-item">
+                <span class="callout-num">01</span>
+                <div class="callout-content">
+                  <div class="callout-heading">TRIPLE-BARRIER FOIL</div>
+                  <div class="callout-desc">Zero UV, moisture, and light penetration</div>
+                </div>
+              </div>
+              <div class="tech-callout-item">
+                <span class="callout-num">02</span>
+                <div class="callout-content">
+                  <div class="callout-heading">OXYGEN TRANSMISSION 0.00</div>
+                  <div class="callout-desc">Total oxidation prevention for 12 months</div>
+                </div>
+              </div>
+              <div class="tech-callout-item">
+                <span class="callout-num">03</span>
+                <div class="callout-content">
+                  <div class="callout-heading">HERMETIC ZIP LOCK</div>
+                  <div class="callout-desc">Resealable airtight crunch barrier</div>
+                </div>
+              </div>
             </div>
           </article>
 
-          <!-- Beat 3: 40–65% The Fruit (Right Aligned) -->
+          <!-- Beat 3: 40–65% The Fruit (Floating Right Editorial Callouts) -->
           <article class="story-beat beat-fruit" id="beat-fruit">
-            <div class="eyebrow-tag">Pure Botanical Harvest</div>
+            <div class="editorial-tracker">
+              <span class="tracker-mono">02 // BOTANICAL HARVEST</span>
+            </div>
             <h2 class="beat-title">One ingredient.<br>Zero compromise.</h2>
             <p class="beat-body">
               No added sugar. No preservatives. No artificial colors. Up to 95% of the water removed, 100% of the flavor kept.
             </p>
-            <div class="specs-chip-row">
-              <span class="spec-chip">100% Single Ingredient</span>
-              <span class="spec-chip">0g Added Sugar</span>
-              <span class="spec-chip">95% Water Extracted</span>
+            <div class="tech-stats-grid">
+              <div class="tech-stat-box">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">PURE RIPE FRUIT</span>
+              </div>
+              <div class="tech-stat-box">
+                <span class="stat-number">0<small>g</small></span>
+                <span class="stat-label">ADDED SUGAR OR OIL</span>
+              </div>
+              <div class="tech-stat-box">
+                <span class="stat-number">95%</span>
+                <span class="stat-label">WATER EXTRACTED</span>
+              </div>
             </div>
           </article>
 
-          <!-- Beat 4: 65–85% The Crunch (Centered / Left) -->
+          <!-- Beat 4: 65–85% The Crunch (Floating Left Editorial Callouts) -->
           <article class="story-beat beat-crunch" id="beat-crunch">
-            <div class="eyebrow-tag">Sub-Zero Cryo Crystallization</div>
+            <div class="editorial-tracker">
+              <span class="tracker-mono">03 // CRYO-SUBLIMATION</span>
+            </div>
             <h2 class="beat-title">Crisp. Light.<br>Unreal.</h2>
             <p class="beat-body">
-              Freeze-drying keeps the shape, color, and nutrients, then adds a melt-in-your-mouth crunch.
+              Freeze-drying keeps the cellular structure, natural color, and nutrients intact, then adds a melt-in-your-mouth crunch.
             </p>
-            <div class="specs-chip-row">
-              <span class="spec-chip">-40°C Flash Frozen</span>
-              <span class="spec-chip">98% Nutrient Integrity</span>
-              <span class="spec-chip">Zero Oil or Frying</span>
+            <div class="tech-stats-grid">
+              <div class="tech-stat-box">
+                <span class="stat-number">−40°<small>C</small></span>
+                <span class="stat-label">CRYO FLASH FREEZE</span>
+              </div>
+              <div class="tech-stat-box">
+                <span class="stat-number">98%</span>
+                <span class="stat-label">NUTRIENT INTEGRITY</span>
+              </div>
+              <div class="tech-stat-box">
+                <span class="stat-number">0.0<small>%</small></span>
+                <span class="stat-label">FRYING OIL OR FAT</span>
+              </div>
             </div>
           </article>
 
-          <!-- Beat 5: 85–100% Reassembly + CTA (Centered) -->
+          <!-- Beat 5: 85–100% Reassembly + CTA (Centered Composition) -->
           <article class="story-beat beat-cta" id="beat-cta">
-            <div class="eyebrow-tag">Orchard To Pouch</div>
+            <div class="editorial-tracker">
+              <span class="tracker-mono">04 // ORCHARD TO POUCH</span>
+            </div>
             <h2 class="beat-title">Snack real.<br>Feel good.</h2>
-            <p class="beat-body" style="max-width: 540px; margin: 0 auto;">
+            <p class="beat-body">
               Realbeber freeze-dried fruit, from Kerala's best orchards to your hands.
             </p>
             <div class="cta-button-group">
-              <a href="#flavors" class="primary-gradient-btn">Shop Realbeber</a>
+              <a href="#flavors" class="primary-gradient-btn">
+                <span>Shop Realbeber</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+              </a>
               <a href="#flavors" class="secondary-ghost-btn">See all flavors</a>
             </div>
           </article>
@@ -389,7 +453,7 @@
     </div>
     <div class="footer-bottom">
       <div>&copy; 2026 Realbeber &amp; Co. All rights reserved.</div>
-      <div>Designed with Apple-grade Scrollytelling Architecture.</div>
+      <div>Awwwards-grade Apple Keynote Scrollytelling Architecture.</div>
     </div>
   </footer>
 
